@@ -1,0 +1,17 @@
+<div class="app-shell">
+  <header class="header">
+    <h1>{{ currentTitle }}</h1>
+    <a routerLink="/settings" class="settings-btn" aria-label="Settings">&#9881;</a>
+  </header>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <nav class="tab-bar">
+    <a *ngFor="let tab of tabs" [routerLink]="'/' + tab.path" routerLinkActive="active" class="tab">
+      <span class="tab-dot"></span>
+      <span class="tab-label">{{ tab.label }}</span>
+    </a>
+  </nav>
+</div>

@@ -1,0 +1,97 @@
+<div *ngIf="s">
+  <!-- VAULT -->
+  <h3 class="h3">Vault ({{ vault.length }})</h3>
+  <div class="card">
+    <div class="muted" style="margin-bottom:8px;">Add creators (handle required):</div>
+    <div *ngFor="let row of vaultRows" class="vault-row">
+      <input [(ngModel)]="row.handle" placeholder="handle" />
+      <input [(ngModel)]="row.niche" placeholder="niche" />
+      <input [(ngModel)]="row.followers" placeholder="foll" type="number" class="narrow" />
+    </div>
+    <button class="secondary" (click)="addVaultRow()" style="margin-top:8px;">+ Row</button>
+    <button class="success" (click)="saveVault()" style="margin-top:8px;">Save to vault</button>
+
+    <div class="muted" style="margin:14px 0 8px;">Or add many handles at once (one per line, no niche/followers):</div>
+    <textarea [(ngModel)]="bulkHandles" rows="5" placeholder="@handle1&#10;@handle2&#10;@handle3"></textarea>
+    <button class="secondary" (click)="addBulkToVault()" style="margin-top:8px;">Add bulk to vault</button>
+
+    <input [(ngModel)]="vaultSearch" placeholder="Search vault (handle, niche, followers)" style="margin-top:12px;" />
+    <div *ngFor="let c of filteredVault" class="vault-item">
+      <span>{{ c.handle }} <span class="muted">· {{ c.niche }} · {{ c.followers }}</span></span>
+      <span class="del" (click)="deleteVaultCreator(c)">×</span>
+    </div>
+  </div>
+
+  <!-- LEADS PER DAY -->
+  <h3 class="h3">Leads per Day</h3>
+  <div class="card stepper-card">
+    <span>Leads (15-20)</span>
+    <div class="stepper">
+      <button class="secondary sq" (click)="step('leadsPerDay',-1)">-</button>
+      <span>{{ s.leadsPerDay }}</span>
+      <button class="secondary sq" (click)="step('leadsPerDay',1)">+</button>
+    </div>
+  </div>
+
+  <!-- DAILY GOALS -->
+  <h3 class="h3">Daily challenge goals</h3>
+  <div class="card">
+    <div *ngFor="let g of goals" class="goal-item">
+      <span>{{ g.label }}</span>
+      <span class="del" (click)="removeGoal(g)">×</span>
+    </div>
+    <div class="muted" style="margin:10px 0 6px;">Add predefined:</div>
+    <div class="goal-add">
+      <button *ngFor="let p of predefinedGoals" class="small secondary" [disabled]="hasGoal(p.type)" (click)="addPredefined(p)">{{ p.label }}</button>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <input [(ngModel)]="customGoal" placeholder="Custom goal" (keyup.enter)="addCustom()" />
+      <button class="small" (click)="addCustom()">+</button>
+    </div>
+  </div>
+
+  <!-- FOLLOW-UP TIMING -->
+  <h3 class="h3">Follow-up timing</h3>
+  <div class="card stepper-card"><span>First</span>
+    <div class="stepper"><button class="secondary sq" (click)="step('fuFirstDays',-1)">-</button><span>{{ s.fuFirstDays }}</span><button class="secondary sq" (click)="step('fuFirstDays',1)">+</button></div>
+  </div>
+  <div class="card stepper-card" style="margin-top:8px;"><span>Second</span>
+    <div class="stepper"><button class="secondary sq" (click)="step('fuSecondDays',-1)">-</button><span>{{ s.fuSecondDays }}</span><button class="secondary sq" (click)="step('fuSecondDays',1)">+</button></div>
+  </div>
+  <div class="fu-third-toggle-wrap" [class.open]="!s.fuThirdEnabled">
+    <div class="card toggle-card" style="margin-top:8px;">
+      <span>Third follow-up</span>
+      <input type="checkbox" [(ngModel)]="s.fuThirdEnabled" (change)="save()" style="width:auto;" />
+    </div>
+  </div>
+  <div class="fu-third-wrap" [class.open]="s.fuThirdEnabled">
+    <div class="card stepper-card" style="margin-top:8px;">
+      <span>Third</span>
+      <div class="stepper">
+        <button class="secondary sq" (click)="step('fuThirdDays',-1)">-</button>
+        <span>{{ s.fuThirdDays }}</span>
+        <button class="secondary sq" (click)="step('fuThirdDays',1)">+</button>
+        <button class="fu-third-off" (click)="disableThird()" title="Turn off third follow-up">&times;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REJECT -->
+  <h3 class="h3">Auto-reject</h3>
+  <div class="card stepper-card"><span>Days until reject</span>
+    <div class="stepper"><button class="secondary sq" (click)="step('rejectAfterDays',-1)">-</button><span>{{ s.rejectAfterDays }}</span><button class="secondary sq" (click)="step('rejectAfterDays',1)">+</button></div>
+  </div>
+
+  <!-- REJECTED LIST -->
+  <h3 class="h3">Rejected ({{ rejected.length }})</h3>
+  <div class="card">
+    <div *ngIf="rejected.length===0" class="muted" style="text-align:center;">None.</div>
+    <div *ngFor="let c of rejected" class="vault-item"><span>{{ c.handle }} <span class="muted">· {{ c.niche }}</span></span></div>
+  </div>
+
+  <!-- WHOP -->
+  <h3 class="h3">Whop (optional)</h3>
+  <div class="card">
+    <input [(ngModel)]="s.whopApiKey" placeholder="Whop API key" (blur)="save()" />
+  </div>
+</div>

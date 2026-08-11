@@ -1,0 +1,25 @@
+.period-switch { display: flex; gap: 6px; margin-bottom: 14px; }
+.period-switch button { background: var(--surface-2); color: var(--text-secondary); padding: 7px; font-size: 12px; }
+.period-switch button.on { background: var(--accent); color: #fff; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat { text-align: center; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+.stat-val { font-size: 22px; font-weight: 600; }
+.stat.streak { background: var(--success-bg); border-color: var(--success); }
+.stat.streak .stat-label, .stat.streak .stat-val { color: var(--success); }
+.challenge-wrap { margin-top: 4px; }
+.challenge { background: var(--warning-bg); border-color: var(--warning); transition: background 1s ease; }
+.challenge-title { font-size: 13px; font-weight: 600; color: var(--warning); margin-bottom: 10px; }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--warning); margin-bottom: 8px; cursor: pointer; }
+.check-row .box { width: 18px; height: 18px; border: 1px solid var(--warning); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.check-row.on .box { background: var(--success); border-color: var(--success); color: #fff; }
+.check-row .count { margin-left: auto; opacity: 0.7; font-size: 12px; }
+.check-row .auto { margin-left: auto; font-size: 10px; opacity: 0.5; }
+.challenge.completing { background: var(--success-bg); border-color: var(--success); animation: flash 1.2s ease; }
+.challenge.completing .challenge-title, .challenge.completing .check-row { color: var(--success); }
+@keyframes flash { 0%{transform:scale(1);} 40%{transform:scale(1.03);} 100%{transform:scale(1);} }
+.done-card { background: var(--success-bg); border-color: var(--success); text-align: center; padding: 32px 16px; animation: pop 0.5s ease; }
+.big-check { font-size: 64px; color: var(--success); line-height: 1; animation: popCheck 0.6s ease; }
+.done-text { font-size: 16px; color: var(--success); font-weight: 600; margin-top: 8px; }
+@keyframes pop { 0%{opacity:0;} 100%{opacity:1;} }
+@keyframes popCheck { 0%{transform:scale(0);} 60%{transform:scale(1.2);} 100%{transform:scale(1);} }
