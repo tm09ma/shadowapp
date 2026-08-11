@@ -1,0 +1,10 @@
+.active-box { background: var(--accent-bg); border-color: var(--accent); margin: 12px 0; }
+.active-row, .fu-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.active-row:last-child { margin-bottom: 0; }
+.active-btns { display: flex; gap: 6px; }
+.card.selected { border-color: var(--accent); border-width: 1.5px; }
+.card.fu-row { margin-bottom: 8px; }
+
+.section-head.clickable { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.section-head .chev { display: inline-block; transition: transform 0.15s ease; font-size: 11px; }
+.section-head .chev.open { transform: rotate(90deg); }

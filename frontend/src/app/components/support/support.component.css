@@ -1,0 +1,5 @@
+.chat { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.bubble { max-width: 85%; padding: 12px; border-radius: 10px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
+.bubble.user { align-self: flex-start; background: var(--surface); border: 0.5px solid var(--border); }
+.bubble.assistant { align-self: flex-end; background: var(--accent-bg); border: 0.5px solid var(--accent); }
+.input-row { display: flex; gap: 8px; }

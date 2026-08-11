@@ -1,0 +1,56 @@
+<div *ngIf="products.length === 0" class="card muted" style="text-align:center;">No won creators yet. Mark a call as Won.</div>
+
+<!-- List -->
+<div *ngIf="openId === null">
+  <div *ngFor="let p of products" class="card row" style="margin-bottom:8px; cursor:pointer;" (click)="open(p)">
+    <div><div class="handle">{{ p.name || 'Unnamed product' }}</div><div class="sub">{{ p.stage }}</div></div>
+    <span style="color:var(--text-secondary);">›</span>
+  </div>
+</div>
+
+<!-- Detail -->
+<div *ngIf="openProduct as p">
+  <button class="secondary small" (click)="openId=null" style="margin-bottom:12px;">← Back</button>
+  <div class="card">
+    <input [(ngModel)]="p.name" placeholder="Product name" (blur)="save(p)" style="margin-bottom:8px;" />
+    <input [(ngModel)]="p.type" placeholder="Type" (blur)="save(p)" style="margin-bottom:8px;" />
+
+    <!-- Current phase -->
+    <div class="phase-bar">
+      <span *ngFor="let ph of phases" class="phase-pill" [class.on]="p.stage===ph">{{ ph }}</span>
+    </div>
+
+    <!-- Checklist per phase (current phase) -->
+    <div class="phase-section">
+      <div class="phase-head">
+        {{ p.stage }} checklist
+        <label class="phase-done">
+          <input type="checkbox" [checked]="phaseDoneFlag(p, p.stage)" (change)="togglePhaseDone(p, p.stage, $any($event.target).checked)" style="width:auto;" />
+          whole phase done
+        </label>
+      </div>
+      <div *ngFor="let i of itemsFor(p.stage)" class="check-item">
+        <span (click)="toggleItem(i)" class="box" [class.on]="i.done">{{ i.done ? '\u2713' : '' }}</span>
+        <span [class.done]="i.done">{{ i.text }}</span>
+        <span class="del" (click)="deleteItem(i)">×</span>
+      </div>
+      <div class="add-item">
+        <input [(ngModel)]="newItemText[p.stage]" placeholder="Add checklist item" (keyup.enter)="addItem(p.stage)" />
+        <button class="small secondary" (click)="addItem(p.stage)">+</button>
+      </div>
+    </div>
+
+    <button *ngIf="p.stage !== 'launch'" class="warning" style="margin-top:12px;" (click)="advance(p)">
+      Advance to next phase
+    </button>
+
+    <!-- Revenue only when live (launch) -->
+    <div *ngIf="isLive(p)" class="card revenue">
+      <div style="font-size:11px; color:var(--success);">Revenue (Whop)</div>
+      <div style="font-size:18px; font-weight:600; color:var(--success);">${{ p.revenue }}</div>
+      <div style="font-size:11px; color:var(--success);">{{ p.customers }} customers</div>
+    </div>
+
+    <textarea [(ngModel)]="p.problemNotes" placeholder="Notes..." rows="3" (blur)="save(p)" style="margin-top:12px;"></textarea>
+  </div>
+</div>

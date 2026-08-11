@@ -1,0 +1,3 @@
+.won-box { background: var(--success-bg); border-color: var(--success); margin-bottom: 16px; }
+.won-title { font-size: 13px; font-weight: 600; color: var(--success); margin-bottom: 8px; }
+.btn-row { display: flex; gap: 8px; }

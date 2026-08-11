@@ -1,0 +1,33 @@
+<!-- Period switch (Won + Reply-Rate) -->
+<div class="period-switch">
+  <button [class.on]="period==='week'" (click)="setPeriod('week')">Week</button>
+  <button [class.on]="period==='month'" (click)="setPeriod('month')">Month</button>
+  <button [class.on]="period==='total'" (click)="setPeriod('total')">Total</button>
+</div>
+
+<div class="stats">
+  <div class="card stat"><div class="stat-label">Sales</div><div class="stat-val">${{ kpis.sales }}</div></div>
+  <div class="card stat"><div class="stat-label">Pipeline</div><div class="stat-val">{{ kpis.pipeline }}</div></div>
+  <div class="card stat"><div class="stat-label">Won</div><div class="stat-val">{{ kpis.won }}</div></div>
+  <div class="card stat"><div class="stat-label">Reply rate</div><div class="stat-val">{{ kpis.replyRate }}%</div></div>
+  <div class="card stat streak"><div class="stat-label">Streak</div><div class="stat-val">{{ daily.streak }}</div></div>
+</div>
+
+<!-- DAILY CHALLENGE -->
+<div class="challenge-wrap">
+  <div *ngIf="!daily.challengeCompleted" class="card challenge" [class.completing]="justCompleted">
+    <div class="challenge-title">Daily challenge</div>
+    <div *ngIf="daily.goals.length === 0" class="muted">Set your goals in Settings.</div>
+    <div *ngFor="let g of daily.goals" class="check-row" [class.on]="g.done" (click)="toggleGoal(g)">
+      <span class="box">{{ g.done ? '\u2713' : '' }}</span>
+      {{ g.label }}
+      <span *ngIf="g.type==='dms'" class="count">{{ daily.dmsSentToday }}/{{ daily.dmsGoal }}</span>
+      <span *ngIf="g.autoTracked" class="auto">auto</span>
+    </div>
+    <button *ngIf="daily.allDone" class="success" style="margin-top:10px;" (click)="complete()">Complete challenge — Streak +1</button>
+  </div>
+  <div *ngIf="daily.challengeCompleted" class="card done-card">
+    <div class="big-check">\u2713</div>
+    <div class="done-text">Daily Challenge</div>
+  </div>
+</div>

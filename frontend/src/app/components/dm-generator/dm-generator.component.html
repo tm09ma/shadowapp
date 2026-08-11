@@ -1,0 +1,54 @@
+<!-- Creator picker if none selected -->
+<div *ngIf="!creator">
+  <div class="muted" style="margin-bottom:10px;">Pick a creator (or open from Outreach):</div>
+  <div *ngIf="readyCreators.length === 0" class="card muted" style="text-align:center;">No DM-ready creators. Mark someone "Ready for DM" in Outreach.</div>
+  <div *ngFor="let c of readyCreators" class="card row" style="margin-bottom:8px; cursor:pointer;" (click)="pick(c)">
+    <div><div class="handle">{{ c.handle }}</div><div class="sub">{{ c.niche }}</div></div>
+    <span style="color:var(--text-secondary);">›</span>
+  </div>
+</div>
+
+<div *ngIf="creator">
+  <div class="card creator-card">
+    <div class="handle" style="color:var(--accent);">{{ creator.handle }}</div>
+    <div class="sub" style="color:var(--accent);">{{ creator.niche }} · {{ creator.followers }}</div>
+  </div>
+
+  <div *ngIf="!result" class="card">
+    <div class="muted" style="margin-bottom:8px;">Context or direction (bio, captions, or "make it more casual"):</div>
+    <textarea [(ngModel)]="context" rows="3" placeholder="Optional"></textarea>
+    <label class="upload-btn">Choose screenshots (up to 3)
+      <input type="file" accept="image/*" multiple (change)="onFiles($event)" hidden />
+    </label>
+    <div *ngIf="previews.length" class="preview-row">
+      <img *ngFor="let p of previews" [src]="p" class="preview-img" alt="" />
+    </div>
+    <button (click)="generate()" [disabled]="loading" style="margin-top:10px;">
+      {{ loading ? 'Claude is writing...' : 'Generate DMs' }}
+    </button>
+    <div *ngIf="error" style="color:var(--danger); font-size:12px; margin-top:10px;">{{ error }}</div>
+  </div>
+
+  <div *ngIf="result">
+    <div class="card reco">
+      <div style="font-size:11px; color:var(--success); font-weight:600;">Recommended: {{ result.recommended }}</div>
+      <div style="font-size:11px; color:var(--success); margin-top:4px;">{{ result.reason }}</div>
+    </div>
+    <div *ngFor="let v of result.versions" class="card version"
+         [class.ready]="v.status==='ready'" [class.review]="v.status==='review'"
+         [class.personal]="v.id==='personal'" [class.selected]="selected===v.id" (click)="selectVersion(v.id)">
+      <div class="v-head">
+        {{ v.status==='ready' ? '\u2713' : '\u26A0' }} {{ v.id==='personal' ? 'Personal DM' : v.id + ': ' + v.label }}
+        <span *ngIf="v.id===result.recommended">\u2605</span>
+      </div>
+      <div class="v-text">{{ v.text }}</div>
+      <div *ngIf="v.tip" class="v-tip">{{ v.id==='personal' ? 'Why: ' : 'Tip: ' }}{{ v.tip }}</div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">Selected: {{ selected }}</div>
+      <textarea [value]="selectedText" rows="4"></textarea>
+      <button style="margin-top:8px;" (click)="markSent()">Mark as sent</button>
+      <button class="secondary" style="margin-top:8px;" (click)="result=null">Regenerate</button>
+    </div>
+  </div>
+</div>

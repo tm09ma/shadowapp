@@ -1,0 +1,30 @@
+<div *ngIf="wonBox" class="card won-box">
+  <div class="won-title">{{ wonBox.handle }} won! Enter product name.</div>
+  <input [(ngModel)]="productName" placeholder="Product name" />
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="success" (click)="confirmWon()">To Product Dev</button>
+    <button class="secondary" (click)="wonBox=null">Cancel</button>
+  </div>
+</div>
+
+<div *ngIf="scheduleFor" class="card" style="margin-bottom:16px;">
+  <div class="handle" style="margin-bottom:8px;">Schedule call — {{ scheduleFor.handle }}</div>
+  <input [(ngModel)]="callLabel" placeholder="Label (e.g. Intro call)" style="margin-bottom:8px;" />
+  <input type="datetime-local" [(ngModel)]="callDate" style="margin-bottom:8px;" />
+  <div class="btn-row">
+    <button class="warning" (click)="saveCall()">Save</button>
+    <button class="secondary" (click)="scheduleFor=null">Cancel</button>
+  </div>
+</div>
+
+<div class="section-head" style="background: var(--accent-bg); color: var(--accent);">Booked calls</div>
+<div *ngIf="booked.length === 0" class="card muted" style="text-align:center;">No booked calls. Book from Active conversations in Outreach.</div>
+<div *ngFor="let c of booked" class="card" style="margin-bottom:8px;">
+  <div class="handle">{{ c.handle }}</div>
+  <div class="sub">{{ c.niche }} · {{ c.exchangeCount }} exchanges</div>
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="small secondary" (click)="openSchedule(c)">Schedule</button>
+    <button class="small success" (click)="openWon(c)">Won</button>
+    <button class="small danger" (click)="markLost(c)">Lost</button>
+  </div>
+</div>

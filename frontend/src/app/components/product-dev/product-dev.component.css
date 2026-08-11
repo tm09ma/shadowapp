@@ -1,0 +1,12 @@
+.phase-bar { display: flex; gap: 6px; margin: 12px 0; }
+.phase-pill { flex:1; text-align:center; font-size: 11px; padding: 6px; border-radius: 6px; background: var(--surface-2); color: var(--text-secondary); }
+.phase-pill.on { background: var(--accent); color: #fff; }
+.phase-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; margin-bottom: 8px; text-transform: capitalize; }
+.phase-done { font-size: 10px; font-weight: 400; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
+.check-item .box { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+.check-item .box.on { background: var(--success); border-color: var(--success); color: #fff; }
+.check-item .done { text-decoration: line-through; opacity: 0.5; }
+.check-item .del { margin-left: auto; color: var(--danger); cursor: pointer; }
+.add-item { display: flex; gap: 6px; margin-top: 8px; }
+.revenue { background: var(--success-bg); border-color: var(--success); margin-top: 12px; }

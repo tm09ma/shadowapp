@@ -1,0 +1,21 @@
+<button *ngIf="!adding" (click)="adding=true" style="margin-bottom:16px;">+ New entry</button>
+<div *ngIf="adding" class="card" style="margin-bottom:16px;">
+  <input [(ngModel)]="draft.title" placeholder="Title" style="margin-bottom:8px;" />
+  <textarea [(ngModel)]="draft.body" placeholder="Free writing..." rows="3" style="margin-bottom:12px;"></textarea>
+  <div class="q-label">What went well?</div>
+  <textarea [(ngModel)]="draft.wentWell" rows="2" style="margin-bottom:10px;"></textarea>
+  <div class="q-label">What blocked you?</div>
+  <textarea [(ngModel)]="draft.blocked" rows="2" style="margin-bottom:10px;"></textarea>
+  <div class="q-label">What will you do differently tomorrow?</div>
+  <textarea [(ngModel)]="draft.tomorrow" rows="2" style="margin-bottom:12px;"></textarea>
+  <button (click)="save()">Save</button>
+  <button class="secondary" style="margin-top:8px;" (click)="adding=false">Cancel</button>
+</div>
+
+<div *ngFor="let e of entries" class="card" style="margin-bottom:10px;">
+  <div class="j-title">{{ e.title || 'Entry' }}</div>
+  <div *ngIf="e.body" class="j-body">{{ e.body }}</div>
+  <div *ngIf="e.wentWell" class="j-q"><b>Went well:</b> {{ e.wentWell }}</div>
+  <div *ngIf="e.blocked" class="j-q"><b>Blocked:</b> {{ e.blocked }}</div>
+  <div *ngIf="e.tomorrow" class="j-q"><b>Tomorrow:</b> {{ e.tomorrow }}</div>
+</div>

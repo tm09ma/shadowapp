@@ -1,0 +1,15 @@
+.h3 { font-size: 14px; font-weight: 600; margin: 16px 0 10px; }
+.h3:first-child { margin-top: 0; }
+.vault-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.vault-row .narrow { max-width: 70px; }
+.vault-item, .goal-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+.del { color: var(--danger); cursor: pointer; font-size: 16px; }
+.stepper-card, .toggle-card { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper span { min-width: 20px; text-align: center; }
+button.sq { width: 34px; padding: 6px; }
+.goal-add { display: flex; flex-wrap: wrap; gap: 6px; }
+.fu-third-wrap, .fu-third-toggle-wrap { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.25s ease, opacity 0.2s ease; }
+.fu-third-wrap.open, .fu-third-toggle-wrap.open { max-height: 70px; opacity: 1; }
+.fu-third-off { width: auto; padding: 4px 8px; margin-left: 2px; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 400; }
+.fu-third-off:hover { color: var(--danger); }
