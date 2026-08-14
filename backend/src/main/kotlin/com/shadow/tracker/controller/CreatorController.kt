@@ -54,4 +54,8 @@ class CreatorController(private val service: CreatorService) {
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long) = service.delete(id)
+
+    // TEMPORARY — one-time cleanup of test data, remove after use
+    @DeleteMapping("/delete-all")
+    fun deleteAll(): Map<String, Int> = mapOf("deleted" to service.deleteAll())
 }
