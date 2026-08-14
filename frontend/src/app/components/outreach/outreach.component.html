@@ -9,15 +9,17 @@
   </div>
   <div class="section-divider"></div>
   <div class="section-body" [class.open]="!collapsed['active']">
-    <div *ngIf="active.length === 0" class="muted" style="text-align:center;">No active conversations.</div>
-    <div *ngFor="let c of active" class="active-row">
-      <div>
-        <div class="handle">{{ heat(c).icon }} {{ c.handle }}</div>
-        <div class="sub">{{ c.niche }} · {{ c.exchangeCount }} exchanges · {{ daysSince(c.lastExchangeAt) }}d ago</div>
-      </div>
-      <div class="active-btns">
-        <button class="small secondary" (click)="addExchange(c)" title="New exchange">+1</button>
-        <button class="small" (click)="bookCall(c)">Call</button>
+    <div class="section-body-inner">
+      <div *ngIf="active.length === 0" class="muted" style="text-align:center;">No active conversations.</div>
+      <div *ngFor="let c of active" class="active-row">
+        <div>
+          <div class="handle">{{ heat(c).icon }} {{ c.handle }}</div>
+          <div class="sub">{{ c.niche }} · {{ c.exchangeCount }} exchanges · {{ daysSince(c.lastExchangeAt) }}d ago</div>
+        </div>
+        <div class="active-btns">
+          <button class="small secondary" (click)="addExchange(c)" title="New exchange">+1</button>
+          <button class="small" (click)="bookCall(c)">Call</button>
+        </div>
       </div>
     </div>
   </div>
@@ -34,15 +36,17 @@
   </div>
   <div class="section-divider"></div>
   <div class="section-body" [class.open]="!collapsed['engagement']">
-    <button (click)="pullDaily()" style="margin-bottom:10px;">Pull today's leads from vault</button>
-    <div *ngIf="loading" class="muted" style="text-align:center;">Loading...</div>
-    <div *ngIf="!loading && engage.length === 0" class="muted" style="text-align:center;">No creators in engagement. Pull from vault.</div>
-    <div *ngFor="let c of engage" class="card row" style="margin-top:8px;">
-      <div>
-        <div class="handle">{{ c.handle }}</div>
-        <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }} · <span style="color:var(--accent-bright);">Day {{ dayCount(c) }}</span></div>
+    <div class="section-body-inner">
+      <button (click)="pullDaily()" style="margin-bottom:10px;">Pull today's leads from vault</button>
+      <div *ngIf="loading" class="muted" style="text-align:center;">Loading...</div>
+      <div *ngIf="!loading && engage.length === 0" class="muted" style="text-align:center;">No creators in engagement. Pull from vault.</div>
+      <div *ngFor="let c of engage" class="card row" style="margin-top:8px;">
+        <div>
+          <div class="handle">{{ c.handle }}</div>
+          <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }} · <span style="color:var(--accent-bright);">Day {{ dayCount(c) }}</span></div>
+        </div>
+        <button class="small secondary" (click)="markReady(c)">Ready for DM</button>
       </div>
-      <button class="small secondary" (click)="markReady(c)">Ready for DM</button>
     </div>
   </div>
 </div>
@@ -58,20 +62,22 @@
   </div>
   <div class="section-divider"></div>
   <div class="section-body" [class.open]="!collapsed['dms']">
-    <div *ngIf="dmReady.length === 0" class="muted" style="text-align:center;">Nothing ready.</div>
-    <div *ngIf="selectedForDm.size > 0" style="margin-bottom:8px;">
-      <button class="success" (click)="markSelectedSent()">Mark {{ selectedForDm.size }} as DM sent</button>
-    </div>
-    <div *ngFor="let c of dmReady" class="card row" style="margin-bottom:8px;"
-         [class.selected]="selectedForDm.has(c.id!)">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <input type="checkbox" style="width:auto;" [checked]="selectedForDm.has(c.id!)" (change)="toggleDmSelect(c.id)" />
-        <div>
-          <div class="handle">{{ c.handle }}</div>
-          <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }}</div>
-        </div>
+    <div class="section-body-inner">
+      <div *ngIf="dmReady.length === 0" class="muted" style="text-align:center;">Nothing ready.</div>
+      <div *ngIf="selectedForDm.size > 0" style="margin-bottom:8px;">
+        <button class="success" (click)="markSelectedSent()">Mark {{ selectedForDm.size }} as DM sent</button>
       </div>
-      <button class="small" (click)="goGenerate(c)">Generate</button>
+      <div *ngFor="let c of dmReady" class="card row" style="margin-bottom:8px;"
+           [class.selected]="selectedForDm.has(c.id!)">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" style="width:auto;" [checked]="selectedForDm.has(c.id!)" (change)="toggleDmSelect(c.id)" />
+          <div>
+            <div class="handle">{{ c.handle }}</div>
+            <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }}</div>
+          </div>
+        </div>
+        <button class="small" (click)="goGenerate(c)">Generate</button>
+      </div>
     </div>
   </div>
 </div>
@@ -87,12 +93,14 @@
   </div>
   <div class="section-divider"></div>
   <div class="section-body" [class.open]="!collapsed['fu1']">
-    <div *ngIf="firstFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
-    <div *ngFor="let c of firstFU" class="card fu-row">
-      <div><div class="handle">{{ c.handle }}</div><div class="sub">DM sent {{ daysSince(c.dmSentAt) }}d ago</div></div>
-      <div class="active-btns">
-        <button class="small" (click)="sendFollowUp(c, 1)">FU sent</button>
-        <button class="small success" (click)="markReplied(c)">Replied</button>
+    <div class="section-body-inner">
+      <div *ngIf="firstFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
+      <div *ngFor="let c of firstFU" class="card fu-row">
+        <div><div class="handle">{{ c.handle }}</div><div class="sub">DM sent {{ daysSince(c.dmSentAt) }}d ago</div></div>
+        <div class="active-btns">
+          <button class="small" (click)="sendFollowUp(c, 1)">FU sent</button>
+          <button class="small success" (click)="markReplied(c)">Replied</button>
+        </div>
       </div>
     </div>
   </div>
@@ -108,12 +116,14 @@
   </div>
   <div class="section-divider"></div>
   <div class="section-body" [class.open]="!collapsed['fu2']">
-    <div *ngIf="secondFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
-    <div *ngFor="let c of secondFU" class="card fu-row">
-      <div><div class="handle">{{ c.handle }}</div><div class="sub">FU1 {{ daysSince(c.fu1SentAt) }}d ago</div></div>
-      <div class="active-btns">
-        <button class="small danger" (click)="sendFollowUp(c, 2)">FU sent</button>
-        <button class="small success" (click)="markReplied(c)">Replied</button>
+    <div class="section-body-inner">
+      <div *ngIf="secondFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
+      <div *ngFor="let c of secondFU" class="card fu-row">
+        <div><div class="handle">{{ c.handle }}</div><div class="sub">FU1 {{ daysSince(c.fu1SentAt) }}d ago</div></div>
+        <div class="active-btns">
+          <button class="small danger" (click)="sendFollowUp(c, 2)">FU sent</button>
+          <button class="small success" (click)="markReplied(c)">Replied</button>
+        </div>
       </div>
     </div>
   </div>
@@ -130,12 +140,14 @@
     </div>
     <div class="section-divider"></div>
     <div class="section-body" [class.open]="!collapsed['fu3']">
-      <div *ngIf="thirdFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
-      <div *ngFor="let c of thirdFU" class="card fu-row">
-        <div><div class="handle">{{ c.handle }}</div><div class="sub">FU2 {{ daysSince(c.fu2SentAt) }}d ago</div></div>
-        <div class="active-btns">
-          <button class="small danger" (click)="sendFollowUp(c, 3)">FU sent</button>
-          <button class="small success" (click)="markReplied(c)">Replied</button>
+      <div class="section-body-inner">
+        <div *ngIf="thirdFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
+        <div *ngFor="let c of thirdFU" class="card fu-row">
+          <div><div class="handle">{{ c.handle }}</div><div class="sub">FU2 {{ daysSince(c.fu2SentAt) }}d ago</div></div>
+          <div class="active-btns">
+            <button class="small danger" (click)="sendFollowUp(c, 3)">FU sent</button>
+            <button class="small success" (click)="markReplied(c)">Replied</button>
+          </div>
         </div>
       </div>
     </div>

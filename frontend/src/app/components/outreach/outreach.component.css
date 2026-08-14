@@ -6,13 +6,16 @@
 .toggle-icon { color: var(--accent-bright); font-size: 18px; font-weight: 300; width: 20px; text-align: center; }
 .section-divider { height: 0.5px; background: var(--accent-border); margin: 0; }
 .section-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 12px;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .section-body.open {
-  max-height: 1200px;
+  grid-template-rows: 1fr;
+}
+.section-body-inner {
+  overflow: hidden;
+  min-height: 0;
   padding: 12px;
 }
 
