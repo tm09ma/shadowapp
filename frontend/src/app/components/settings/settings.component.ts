@@ -32,7 +32,21 @@ export class SettingsComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.api.getSettings().subscribe(s => this.s = s);
+    this.api.getSettings().subscribe({
+      next: s => this.s = s,
+      error: () => this.s = {
+        id: 1,
+        fuFirstDays: 1,
+        fuSecondDays: 3,
+        fuThirdEnabled: false,
+        fuThirdDays: 7,
+        leadsPerDay: 15,
+        rejectAfterDays: 7,
+        whopApiKey: '',
+        darkMode: true,
+        language: 'en'
+      }
+    });
     this.loadGoals(); this.loadVault(); this.loadRejected();
   }
   loadGoals(): void { this.api.getGoals().subscribe(g => this.goals = g); }

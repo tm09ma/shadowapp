@@ -6,8 +6,8 @@
 .stat.clickable { cursor: pointer; }
 .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
 .stat-val { font-size: 22px; font-weight: 600; color: var(--text); }
-.stat.streak { background: var(--success-bg); border-color: rgba(90,158,106,0.3); }
-.stat.streak .stat-label, .stat.streak .stat-val { color: var(--success); }
+.stat.streak { background: var(--accent-dim); border-color: var(--accent-border); }
+.stat.streak .stat-label, .stat.streak .stat-val { color: var(--accent-bright); }
 
 .challenge-wrap { margin-top: 4px; }
 .challenge { background: var(--accent-dim); border-color: var(--accent-border); transition: background 1s ease; }
@@ -117,7 +117,8 @@
 .donut-box { display: flex; align-items: center; justify-content: center; }
 .donut-empty-label { position: absolute; font-size: 9px; color: var(--text-muted); text-align: center; pointer-events: none; }
 
-.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mini-stat { padding: 12px; border-radius: 14px; }
+.mini-stat.full-width { grid-column: 1 / -1; }
 .mini-stat-label { font-size: 9px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; }
-.mini-stat-val { font-size: 18px; font-weight: 600; color: var(--accent-bright); }
+.mini-stat-val { font-size: 20px; font-weight: 600; color: var(--accent-bright); }

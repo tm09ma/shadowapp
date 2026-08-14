@@ -113,19 +113,35 @@
       </div>
     </div>
 
-    <!-- Block C: streak / avg per day / pipeline -->
-    <div class="three-col">
+    <!-- Block C: all 7 metrics -->
+    <div class="metrics-grid">
       <div class="card mini-stat">
-        <div class="mini-stat-label">Streak</div>
-        <div class="mini-stat-val">{{ daily.streak }}</div>
+        <div class="mini-stat-label">Reply Rate</div>
+        <div class="mini-stat-val">{{ kpis.replyRate }}%</div>
       </div>
       <div class="card mini-stat">
-        <div class="mini-stat-label">Avg per day</div>
-        <div class="mini-stat-val">{{ avgPerDay }}</div>
+        <div class="mini-stat-label">Total DMs</div>
+        <div class="mini-stat-val">{{ totalDms }}</div>
       </div>
       <div class="card mini-stat">
-        <div class="mini-stat-label">Pipeline</div>
-        <div class="mini-stat-val">{{ kpis.pipeline }}</div>
+        <div class="mini-stat-label">Replies</div>
+        <div class="mini-stat-val">{{ totalReplies }}</div>
+      </div>
+      <div class="card mini-stat">
+        <div class="mini-stat-label">Won</div>
+        <div class="mini-stat-val">{{ wonCount }}</div>
+      </div>
+      <div class="card mini-stat">
+        <div class="mini-stat-label">Lost</div>
+        <div class="mini-stat-val">{{ lostCount }}</div>
+      </div>
+      <div class="card mini-stat">
+        <div class="mini-stat-label">FU Reply Rate</div>
+        <div class="mini-stat-val">{{ fuReplyRate }}%</div>
+      </div>
+      <div class="card mini-stat full-width">
+        <div class="mini-stat-label">Best Version</div>
+        <div class="mini-stat-val">{{ bestVersion }}</div>
       </div>
     </div>
   </div>
