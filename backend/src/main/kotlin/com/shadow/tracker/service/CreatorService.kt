@@ -59,13 +59,6 @@ class CreatorService(
 
     fun delete(id: Long) = creatorRepository.deleteById(id)
 
-    // TEMPORARY — one-time cleanup of test data, remove after use
-    fun deleteAll(): Int {
-        val count = creatorRepository.findAll().size
-        creatorRepository.deleteAll()
-        return count
-    }
-
     // --- STAGE / DM ---
     fun updateStage(id: Long, stage: String): Creator {
         val c = get(id)
