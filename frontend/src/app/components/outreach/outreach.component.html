@@ -1,14 +1,14 @@
 <!-- ACTIVE CONVERSATIONS -->
 <div class="section-wrap">
-  <div class="section-header" (click)="toggle('active')">
+  <div class="section-header" [class.clickable]="active.length > 0" (click)="toggle('active', active.length)">
     <span class="section-name">Active conversations</span>
     <div class="section-right">
       <span class="gold-badge">{{ active.length }}</span>
-      <span class="toggle-icon">{{ !collapsed['active'] ? '−' : '+' }}</span>
+      <span class="toggle-icon" *ngIf="active.length > 0">{{ !collapsed['active'] ? '−' : '+' }}</span>
     </div>
   </div>
   <div class="section-divider"></div>
-  <div class="section-body" [class.open]="!collapsed['active']">
+  <div class="section-body" [class.open]="!collapsed['active'] || active.length === 0">
     <div class="section-body-inner">
       <div *ngIf="active.length === 0" class="muted" style="text-align:center;">No active conversations.</div>
       <div *ngFor="let c of active" class="active-row">
@@ -27,15 +27,15 @@
 
 <!-- ENGAGEMENT -->
 <div class="section-wrap">
-  <div class="section-header" (click)="toggle('engagement')">
+  <div class="section-header" [class.clickable]="engage.length > 0" (click)="toggle('engagement', engage.length)">
     <span class="section-name">Engagement</span>
     <div class="section-right">
       <span class="gold-badge">{{ engage.length }}</span>
-      <span class="toggle-icon">{{ !collapsed['engagement'] ? '−' : '+' }}</span>
+      <span class="toggle-icon" *ngIf="engage.length > 0">{{ !collapsed['engagement'] ? '−' : '+' }}</span>
     </div>
   </div>
   <div class="section-divider"></div>
-  <div class="section-body" [class.open]="!collapsed['engagement']">
+  <div class="section-body" [class.open]="!collapsed['engagement'] || engage.length === 0">
     <div class="section-body-inner">
       <button (click)="pullDaily()" style="margin-bottom:10px;">Pull today's leads from vault</button>
       <div *ngIf="loading" class="muted" style="text-align:center;">Loading...</div>
@@ -53,15 +53,15 @@
 
 <!-- SEND DMs -->
 <div class="section-wrap">
-  <div class="section-header" (click)="toggle('dms')">
+  <div class="section-header" [class.clickable]="dmReady.length > 0" (click)="toggle('dms', dmReady.length)">
     <span class="section-name">Send DMs today</span>
     <div class="section-right">
       <span class="gold-badge">{{ dmReady.length }}</span>
-      <span class="toggle-icon">{{ !collapsed['dms'] ? '−' : '+' }}</span>
+      <span class="toggle-icon" *ngIf="dmReady.length > 0">{{ !collapsed['dms'] ? '−' : '+' }}</span>
     </div>
   </div>
   <div class="section-divider"></div>
-  <div class="section-body" [class.open]="!collapsed['dms']">
+  <div class="section-body" [class.open]="!collapsed['dms'] || dmReady.length === 0">
     <div class="section-body-inner">
       <div *ngIf="dmReady.length === 0" class="muted" style="text-align:center;">Nothing ready.</div>
       <div *ngIf="selectedForDm.size > 0" style="margin-bottom:8px;">
@@ -84,15 +84,15 @@
 
 <!-- FOLLOW-UPS -->
 <div class="section-wrap">
-  <div class="section-header" (click)="toggle('fu1')">
+  <div class="section-header" [class.clickable]="firstFU.length > 0" (click)="toggle('fu1', firstFU.length)">
     <span class="section-name">First follow-ups</span>
     <div class="section-right">
       <span class="gold-badge">{{ firstFU.length }}</span>
-      <span class="toggle-icon">{{ !collapsed['fu1'] ? '−' : '+' }}</span>
+      <span class="toggle-icon" *ngIf="firstFU.length > 0">{{ !collapsed['fu1'] ? '−' : '+' }}</span>
     </div>
   </div>
   <div class="section-divider"></div>
-  <div class="section-body" [class.open]="!collapsed['fu1']">
+  <div class="section-body" [class.open]="!collapsed['fu1'] || firstFU.length === 0">
     <div class="section-body-inner">
       <div *ngIf="firstFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
       <div *ngFor="let c of firstFU" class="card fu-row">
@@ -107,15 +107,15 @@
 </div>
 
 <div class="section-wrap">
-  <div class="section-header" (click)="toggle('fu2')">
+  <div class="section-header" [class.clickable]="secondFU.length > 0" (click)="toggle('fu2', secondFU.length)">
     <span class="section-name">Second follow-ups</span>
     <div class="section-right">
       <span class="gold-badge">{{ secondFU.length }}</span>
-      <span class="toggle-icon">{{ !collapsed['fu2'] ? '−' : '+' }}</span>
+      <span class="toggle-icon" *ngIf="secondFU.length > 0">{{ !collapsed['fu2'] ? '−' : '+' }}</span>
     </div>
   </div>
   <div class="section-divider"></div>
-  <div class="section-body" [class.open]="!collapsed['fu2']">
+  <div class="section-body" [class.open]="!collapsed['fu2'] || secondFU.length === 0">
     <div class="section-body-inner">
       <div *ngIf="secondFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
       <div *ngFor="let c of secondFU" class="card fu-row">
@@ -131,15 +131,15 @@
 
 <ng-container *ngIf="settings?.fuThirdEnabled">
   <div class="section-wrap">
-    <div class="section-header" (click)="toggle('fu3')">
+    <div class="section-header" [class.clickable]="thirdFU.length > 0" (click)="toggle('fu3', thirdFU.length)">
       <span class="section-name">Third follow-ups</span>
       <div class="section-right">
         <span class="gold-badge">{{ thirdFU.length }}</span>
-        <span class="toggle-icon">{{ !collapsed['fu3'] ? '−' : '+' }}</span>
+        <span class="toggle-icon" *ngIf="thirdFU.length > 0">{{ !collapsed['fu3'] ? '−' : '+' }}</span>
       </div>
     </div>
     <div class="section-divider"></div>
-    <div class="section-body" [class.open]="!collapsed['fu3']">
+    <div class="section-body" [class.open]="!collapsed['fu3'] || thirdFU.length === 0">
       <div class="section-body-inner">
         <div *ngIf="thirdFU.length === 0" class="muted" style="text-align:center;">Nothing due.</div>
         <div *ngFor="let c of thirdFU" class="card fu-row">

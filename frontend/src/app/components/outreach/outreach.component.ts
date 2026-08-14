@@ -28,7 +28,10 @@ export class OutreachComponent implements OnInit {
     fu2: false,
     fu3: false,
   };
-  toggle(section: string): void { this.collapsed[section] = !this.collapsed[section]; }
+  toggle(section: string, count: number): void {
+    if (count === 0) return;
+    this.collapsed[section] = !this.collapsed[section];
+  }
 
   constructor(private api: ApiService, private router: Router) {}
 
