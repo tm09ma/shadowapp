@@ -70,6 +70,31 @@ export class OutreachComponent implements OnInit {
     if (!date) return 0;
     return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
   }
+
+  fuOverdueDays(creator: Creator, fuNumber: number): number {
+    let dueFrom: string | undefined;
+    const settings = this.settings;
+    if (fuNumber === 1) dueFrom = creator.dmSentAt;
+    if (fuNumber === 2) dueFrom = creator.fu1SentAt;
+    if (fuNumber === 3) dueFrom = creator.fu2SentAt;
+    if (!dueFrom) return 0;
+
+    const dueDays = fuNumber === 1 ? (settings?.fuFirstDays ?? 1)
+      : fuNumber === 2 ? (settings?.fuSecondDays ?? 3)
+      : (settings?.fuThirdDays ?? 7);
+
+    const daysSince = Math.floor(
+      (Date.now() - new Date(dueFrom).getTime()) / 86400000
+    );
+    return Math.max(0, daysSince - dueDays);
+  }
+
+  fuCardClass(creator: Creator, fuNumber: number): string {
+    const overdue = this.fuOverdueDays(creator, fuNumber);
+    if (overdue === 0) return 'fu-gold';
+    if (overdue === 1) return 'fu-orange';
+    return 'fu-red';
+  }
   dayCount(c: Creator): number { return this.daysSince(c.addedAt) + 1; }
   fmtK(n: number): string { return n ? (n / 1000).toFixed(0) + 'k' : '?'; }
 

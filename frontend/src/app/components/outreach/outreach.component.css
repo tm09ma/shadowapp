@@ -25,3 +25,25 @@
 .active-btns { display: flex; gap: 6px; }
 .card.selected { border-color: var(--accent); border-width: 1.5px; }
 .card.fu-row { margin-bottom: 8px; }
+
+/* Standard: Gold (pünktlich) */
+.fu-gold {
+  background: var(--glass);
+  border-color: var(--glass-border);
+}
+
+/* 1 Tag vergessen: Orange mit starkem Kontrast */
+.fu-orange {
+  background: rgba(200,100,20,0.12);
+  border: 1px solid rgba(220,120,30,0.5);
+  border-left: 3px solid #d4641e;
+}
+.fu-orange .handle { color: #e07030; }
+
+/* 2+ Tage vergessen: Dunkelrot */
+.fu-red {
+  background: rgba(160,40,30,0.12);
+  border: 1px solid rgba(180,50,40,0.4);
+  border-left: 3px solid #a02820;
+}
+.fu-red .handle { color: #c04030; }
