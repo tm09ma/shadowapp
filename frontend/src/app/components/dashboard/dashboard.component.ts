@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { ApiService } from '../../services/api.service';
@@ -6,9 +6,10 @@ import { Creator } from '../../models/creator.model';
 
 Chart.register(...registerables);
 
-const GOLD_TEXT = 'rgba(120,100,60,0.8)';
-const GOLD_GRID = 'rgba(200,160,60,0.08)';
-const GOLD_TONES = ['#f0b84a', '#c8922a', '#a5751f', '#8a6018', '#6b4a10', '#4a330a'];
+const AXIS_TICK = 'rgba(160,130,60,0.7)';
+const AXIS_GRID = 'rgba(200,160,60,0.06)';
+const GOLD_TONES = ['#f0b84a', '#c8922a', '#8a6020', '#4a3010'];
+const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +18,7 @@ const GOLD_TONES = ['#f0b84a', '#c8922a', '#a5751f', '#8a6018', '#6b4a10', '#4a3
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
+export class DashboardComponent implements OnInit {
   kpis: any = { sales: 0, pipeline: 0, won: 0, replyRate: 0 };
   period = 'total';
   daily: any = { goals: [], allDone: false, challengeCompleted: false, streak: 0, dmsSentToday: 0, dmsGoal: 15 };
@@ -44,10 +45,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   lostCount = 0;
   fuReplyRate = 0;
   bestVersion = '—';
+  sinceLabel = '';
+  avgPerDay = '0.0';
 
+  private dailyLabels: string[] = [];
+  private dailyReplyRateData: number[] = [];
   private weekLabels: string[] = [];
   private dmPerWeekData: number[] = [];
-  private replyRatePerWeekData: number[] = [];
   private nicheLabels: string[] = [];
   private nicheData: number[] = [];
 
@@ -58,7 +62,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private lineChart?: Chart;
   private barChart?: Chart;
   private donutChart?: Chart;
-  private viewReady = false;
+  private chartsInitialized = false;
 
   constructor(private api: ApiService) {}
 
@@ -67,11 +71,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.loadDaily();
     this.pickQuote();
     this.loadAnalytics();
-  }
-
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.renderCharts();
   }
 
   pickQuote(): void {
@@ -100,13 +99,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }, 1200);
   }
 
-  openAnalytics(): void { this.analyticsOpen = true; }
+  get hasNicheData(): boolean { return this.nicheLabels.length > 0; }
+
+  openAnalytics(): void {
+    this.analyticsOpen = true;
+    setTimeout(() => this.initCharts(), 150);
+  }
   closeAnalytics(): void { this.analyticsOpen = false; }
 
   loadAnalytics(): void {
     this.api.getCreators().subscribe(creators => {
       this.buildAnalytics(creators);
-      this.renderCharts();
+      if (this.chartsInitialized) this.updateCharts();
     });
   }
 
@@ -119,45 +123,57 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.wonCount = creators.filter(c => c.stage === 'won').length;
     this.lostCount = creators.filter(c => c.stage === 'lost').length;
 
-    const fuSent = creators.filter(c => c.fu1SentAt || c.fu2SentAt || c.fu3SentAt);
+    const fuSent = creators.filter(c => !!c.fu1SentAt);
     const fuReplied = fuSent.filter(c => c.replied);
     this.fuReplyRate = fuSent.length ? Math.round((fuReplied.length / fuSent.length) * 100) : 0;
 
-    const versionStats: Record<string, { sent: number; replied: number }> = {};
-    sent.forEach(c => {
+    const versionCounts: Record<string, number> = {};
+    replied.forEach(c => {
       const v = c.dmVersion || 'unknown';
-      versionStats[v] = versionStats[v] || { sent: 0, replied: 0 };
-      versionStats[v].sent++;
-      if (c.replied) versionStats[v].replied++;
+      versionCounts[v] = (versionCounts[v] || 0) + 1;
     });
     let bestVersion = '—';
-    let bestRate = -1;
-    Object.entries(versionStats).forEach(([v, s]) => {
-      const rate = s.sent ? s.replied / s.sent : 0;
-      if (rate > bestRate) { bestRate = rate; bestVersion = v; }
+    let bestCount = 0;
+    Object.entries(versionCounts).forEach(([v, count]) => {
+      if (count > bestCount) { bestCount = count; bestVersion = v; }
     });
     this.bestVersion = bestVersion;
+
+    const dmDates = sent.map(c => new Date(c.dmSentAt!).getTime());
+    const sinceDate = dmDates.length ? new Date(Math.min(...dmDates)) : new Date();
+    this.sinceLabel = sinceDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const daysSinceStart = Math.max(1, Math.round((Date.now() - sinceDate.getTime()) / 86400000));
+    this.avgPerDay = (this.totalDms / daysSinceStart).toFixed(1);
 
     const nicheCounts: Record<string, number> = {};
     replied.forEach(c => {
       const n = c.niche || 'Other';
       nicheCounts[n] = (nicheCounts[n] || 0) + 1;
     });
-    const nicheEntries = Object.entries(nicheCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const nicheEntries = Object.entries(nicheCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
     this.nicheLabels = nicheEntries.map(e => e[0]);
     this.nicheData = nicheEntries.map(e => e[1]);
 
-    const weeks = this.lastNWeekStarts(8);
-    this.weekLabels = weeks.map(w => `${w.getMonth() + 1}/${w.getDate()}`);
-    this.dmPerWeekData = weeks.map((w, i) => {
-      const end = weeks[i + 1] ?? new Date(w.getTime() + 7 * 86400000);
-      return sent.filter(c => this.inRange(c.dmSentAt, w, end)).length;
-    });
-    this.replyRatePerWeekData = weeks.map((w, i) => {
-      const end = weeks[i + 1] ?? new Date(w.getTime() + 7 * 86400000);
-      const bucket = sent.filter(c => this.inRange(c.dmSentAt, w, end));
+    const days7: Date[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      days7.push(d);
+    }
+    this.dailyLabels = days7.map(d => DAY_NAMES[d.getDay()]);
+    this.dailyReplyRateData = days7.map(d => {
+      const next = new Date(d.getTime() + 86400000);
+      const bucket = sent.filter(c => this.inRange(c.dmSentAt, d, next));
       if (!bucket.length) return 0;
       return Math.round((bucket.filter(c => c.replied).length / bucket.length) * 100);
+    });
+
+    const weekStarts = this.lastNWeekStarts(4);
+    this.weekLabels = weekStarts.map((_, i) => 'W' + (i + 1));
+    this.dmPerWeekData = weekStarts.map((w, i) => {
+      const end = weekStarts[i + 1] ?? new Date(w.getTime() + 7 * 86400000);
+      return sent.filter(c => this.inRange(c.dmSentAt, w, end)).length;
     });
   }
 
@@ -181,25 +197,40 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return t >= start.getTime() && t < end.getTime();
   }
 
-  private renderCharts(): void {
-    if (!this.viewReady) return;
+  private initCharts(): void {
     const lineCanvas = this.lineChartCanvas?.nativeElement;
     const barCanvas = this.barChartCanvas?.nativeElement;
     const donutCanvas = this.donutChartCanvas?.nativeElement;
     if (!lineCanvas || !barCanvas || !donutCanvas) return;
 
-    this.lineChart?.destroy();
+    if (!this.chartsInitialized) {
+      this.createCharts(lineCanvas, barCanvas, donutCanvas);
+      this.chartsInitialized = true;
+    } else {
+      this.updateCharts();
+    }
+  }
+
+  private createCharts(lineCanvas: HTMLCanvasElement, barCanvas: HTMLCanvasElement, donutCanvas: HTMLCanvasElement): void {
+    const ctx = lineCanvas.getContext('2d')!;
+    const gradient = ctx.createLinearGradient(0, 0, 0, 130);
+    gradient.addColorStop(0, 'rgba(240,184,74,0.25)');
+    gradient.addColorStop(1, 'rgba(240,184,74,0)');
+
     this.lineChart = new Chart(lineCanvas, {
       type: 'line',
       data: {
-        labels: this.weekLabels,
+        labels: this.dailyLabels,
         datasets: [{
-          data: this.replyRatePerWeekData,
+          data: this.dailyReplyRateData,
           borderColor: '#f0b84a',
-          backgroundColor: 'rgba(200,146,42,0.2)',
+          backgroundColor: gradient,
           fill: true,
-          tension: 0.35,
-          pointRadius: 0
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#f0b84a',
+          pointBorderColor: '#f0b84a'
         }]
       },
       options: {
@@ -207,55 +238,72 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: GOLD_TEXT }, grid: { color: GOLD_GRID } },
-          y: { ticks: { color: GOLD_TEXT }, grid: { color: GOLD_GRID } }
+          x: { grid: { color: AXIS_GRID }, ticks: { color: AXIS_TICK, font: { size: 10 } } },
+          y: {
+            min: 0, max: 100,
+            ticks: { stepSize: 25, color: AXIS_TICK, font: { size: 10 }, callback: v => v + '%' },
+            grid: { color: AXIS_GRID }
+          }
         }
       }
     });
 
-    this.barChart?.destroy();
     this.barChart = new Chart(barCanvas, {
       type: 'bar',
       data: {
         labels: this.weekLabels,
-        datasets: [{
-          data: this.dmPerWeekData,
-          backgroundColor: 'rgba(200,146,42,0.35)',
-          borderColor: '#f0b84a',
-          borderWidth: 1,
-          borderRadius: 4
-        }]
+        datasets: [{ data: this.dmPerWeekData, backgroundColor: 'rgba(200,146,42,0.7)', borderRadius: 5 }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: GOLD_TEXT }, grid: { display: false } },
-          y: { ticks: { color: GOLD_TEXT }, grid: { color: GOLD_GRID } }
+          x: { grid: { color: AXIS_GRID }, ticks: { color: AXIS_TICK, font: { size: 10 } } },
+          y: { beginAtZero: true, grid: { color: AXIS_GRID }, ticks: { color: AXIS_TICK, font: { size: 10 }, precision: 0 } }
         }
       }
     });
 
-    this.donutChart?.destroy();
-    const hasNicheData = this.nicheLabels.length > 0;
+    const has = this.hasNicheData;
     this.donutChart = new Chart(donutCanvas, {
       type: 'doughnut',
       data: {
-        labels: hasNicheData ? this.nicheLabels : ['No data'],
+        labels: has ? this.nicheLabels : ['No data'],
         datasets: [{
-          data: hasNicheData ? this.nicheData : [1],
-          backgroundColor: hasNicheData ? GOLD_TONES : ['rgba(200,160,60,0.1)'],
-          borderColor: 'transparent'
+          data: has ? this.nicheData : [1],
+          backgroundColor: has ? GOLD_TONES : ['rgba(200,146,42,0.15)'],
+          borderColor: has ? 'transparent' : 'rgba(200,146,42,0.3)',
+          borderWidth: has ? 0 : 1
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { color: GOLD_TEXT, boxWidth: 10, font: { size: 10 } } }
-        }
+        cutout: '65%',
+        plugins: { legend: { display: false } }
       }
     });
+  }
+
+  private updateCharts(): void {
+    if (this.lineChart) {
+      this.lineChart.data.labels = this.dailyLabels;
+      this.lineChart.data.datasets[0].data = this.dailyReplyRateData;
+      this.lineChart.update();
+    }
+    if (this.barChart) {
+      this.barChart.data.labels = this.weekLabels;
+      this.barChart.data.datasets[0].data = this.dmPerWeekData;
+      this.barChart.update();
+    }
+    if (this.donutChart) {
+      const has = this.hasNicheData;
+      this.donutChart.data.labels = has ? this.nicheLabels : ['No data'];
+      this.donutChart.data.datasets[0].data = has ? this.nicheData : [1];
+      this.donutChart.data.datasets[0].backgroundColor = has ? GOLD_TONES : ['rgba(200,146,42,0.15)'];
+      (this.donutChart.data.datasets[0] as any).borderColor = has ? 'transparent' : 'rgba(200,146,42,0.3)';
+      this.donutChart.update();
+    }
   }
 }

@@ -40,36 +40,93 @@
 <!-- Analytics Overlay -->
 <div class="analytics-overlay" [class.open]="analyticsOpen">
   <div class="analytics-header">
+    <div>
+      <div class="analytics-title">Analytics</div>
+      <div class="analytics-since">Since {{ sinceLabel }}</div>
+    </div>
     <button class="close-btn" (click)="closeAnalytics()">&#x2715;</button>
-    <div class="analytics-title">Analytics</div>
   </div>
+
+  <!-- Stats Banner -->
+  <div class="stats-banner">
+    <div class="stat-unit">
+      <div class="stat-unit-label">Reply rate</div>
+      <div class="stat-unit-val" style="color:var(--accent-bright);">
+        <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V6M6 11l6-6 6 6"/></svg>
+        {{ kpis.replyRate }}%
+      </div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">Total DMs</div>
+      <div class="stat-unit-val" style="color:var(--text);">{{ totalDms }}</div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">Replies</div>
+      <div class="stat-unit-val" style="color:var(--text);">{{ totalReplies }}</div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">Won</div>
+      <div class="stat-unit-val" style="color:#5a9e6a;">
+        <svg class="mini-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.9 6.4 7 0.6-5.3 4.6 1.6 6.9L12 16.9 5.8 20.5l1.6-6.9L2.1 9l7-0.6L12 2Z"/></svg>
+        {{ wonCount }}
+      </div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">Lost</div>
+      <div class="stat-unit-val" style="color:var(--text-secondary);">{{ lostCount }}</div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">FU rate</div>
+      <div class="stat-unit-val" style="color:var(--text);">{{ fuReplyRate }}%</div>
+    </div>
+    <div class="stat-unit">
+      <div class="stat-unit-label">Best version</div>
+      <div class="stat-unit-val" style="color:var(--accent-bright);">{{ bestVersion }}</div>
+    </div>
+  </div>
+
   <div class="analytics-scroll">
-    <!-- Reply Rate Hero -->
-    <div class="analytics-hero">
-      <div class="hero-label">Reply rate</div>
-      <div class="hero-val">{{ kpis.replyRate }}%</div>
+    <!-- Empty state -->
+    <div *ngIf="totalDms === 0" class="empty-hint-card">
+      <p>Send your first DM to start tracking your performance.</p>
     </div>
-    <!-- Charts -->
-    <div class="chart-section">
-      <div class="chart-title">Reply rate over time</div>
-      <canvas #lineChartCanvas></canvas>
+
+    <!-- Block A: reply rate over time -->
+    <div class="card chart-card">
+      <div class="chart-label">Reply rate over time</div>
+      <div class="chart-box" style="height:130px;"><canvas #lineChartCanvas></canvas></div>
+      <div class="chart-caption">Tracks your first-DM reply rate daily</div>
     </div>
-    <div class="chart-section">
-      <div class="chart-title">DMs sent per week</div>
-      <canvas #barChartCanvas></canvas>
+
+    <!-- Block B: DMs per week + best niche -->
+    <div class="two-col">
+      <div class="card chart-card small">
+        <div class="chart-label">DMs per week</div>
+        <div class="chart-box" style="height:100px;"><canvas #barChartCanvas></canvas></div>
+      </div>
+      <div class="card chart-card small">
+        <div class="chart-label">Best niche</div>
+        <div class="chart-box donut-box" style="height:100px;">
+          <canvas #donutChartCanvas></canvas>
+          <div *ngIf="!hasNicheData" class="donut-empty-label">No data yet</div>
+        </div>
+      </div>
     </div>
-    <div class="chart-section">
-      <div class="chart-title">Best performing niche</div>
-      <canvas #donutChartCanvas></canvas>
-    </div>
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-item"><div class="stat-label">Total DMs</div><div class="stat-val">{{ totalDms }}</div></div>
-      <div class="stat-item"><div class="stat-label">Total replies</div><div class="stat-val">{{ totalReplies }}</div></div>
-      <div class="stat-item"><div class="stat-label">Won</div><div class="stat-val">{{ wonCount }}</div></div>
-      <div class="stat-item"><div class="stat-label">Lost</div><div class="stat-val">{{ lostCount }}</div></div>
-      <div class="stat-item"><div class="stat-label">FU reply rate</div><div class="stat-val">{{ fuReplyRate }}%</div></div>
-      <div class="stat-item"><div class="stat-label">Best version</div><div class="stat-val">{{ bestVersion }}</div></div>
+
+    <!-- Block C: streak / avg per day / pipeline -->
+    <div class="three-col">
+      <div class="card mini-stat">
+        <div class="mini-stat-label">Streak</div>
+        <div class="mini-stat-val">{{ daily.streak }}</div>
+      </div>
+      <div class="card mini-stat">
+        <div class="mini-stat-label">Avg per day</div>
+        <div class="mini-stat-val">{{ avgPerDay }}</div>
+      </div>
+      <div class="card mini-stat">
+        <div class="mini-stat-label">Pipeline</div>
+        <div class="mini-stat-val">{{ kpis.pipeline }}</div>
+      </div>
     </div>
   </div>
 </div>
