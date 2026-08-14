@@ -1,7 +1,8 @@
 <div class="chat">
   <div *ngIf="messages.length === 0 && !loading" class="card muted" style="text-align:center;">Ask your mentor anything.</div>
   <div *ngFor="let m of messages" class="bubble" [class.user]="m.role==='user'" [class.assistant]="m.role==='assistant'">{{ m.text }}</div>
-  <div *ngIf="loading" class="muted" style="align-self:flex-end;">typing...</div>
+  <div class="typing" *ngIf="loading"><span></span><span></span><span></span></div>
+  <div #bottom></div>
 </div>
 <div class="input-row">
   <input [(ngModel)]="input" (keyup.enter)="send()" placeholder="Ask..." />

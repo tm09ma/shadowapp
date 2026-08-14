@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 import { ApiService } from './services/api.service';
 
 @Component({
@@ -10,22 +11,53 @@ import { ApiService } from './services/api.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   tabs = [
-    { path: 'dashboard', label: 'Home' },
-    { path: 'outreach', label: 'Outreach' },
-    { path: 'dm-generator', label: 'DM Gen' },
-    { path: 'product', label: 'Product' },
-    { path: 'journal', label: 'Journal' },
-    { path: 'calls', label: 'Calls' },
-    { path: 'support', label: 'Mentor' },
+    { path: 'dashboard' },
+    { path: 'outreach' },
+    { path: 'dm-generator' },
+    { path: 'product' },
+    { path: 'journal' },
+    { path: 'calls' },
+    { path: 'support' },
   ];
+
+  @ViewChild('pillNav') pillNav?: ElementRef<HTMLElement>;
+  @ViewChild('pillBlob') pillBlob?: ElementRef<HTMLElement>;
+  @ViewChildren('pillTabs') pillTabs?: QueryList<ElementRef<HTMLElement>>;
 
   constructor(public router: Router, private api: ApiService) {}
 
   ngOnInit(): void {
     // Auto-Reject beim Start (bis Deployment)
     this.api.autoReject().subscribe();
+
+    // Blob muss auch bei direktem URL-Aufruf / Back-Forward am richtigen Tab landen.
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      this.updateBlob(this.activeIndex());
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Erst nach dem ersten Layout-Tick messen, sonst sind die Tab-Rects noch 0.
+    setTimeout(() => this.updateBlob(this.activeIndex()), 0);
+  }
+
+  activeIndex(): number {
+    const seg = this.router.url.split('/')[1] || 'dashboard';
+    const i = this.tabs.findIndex(t => t.path === seg);
+    return i >= 0 ? i : 0;
+  }
+
+  updateBlob(index: number): void {
+    const navEl = this.pillNav?.nativeElement;
+    const tabEl = this.pillTabs?.toArray()[index]?.nativeElement;
+    const blobEl = this.pillBlob?.nativeElement;
+    if (!navEl || !tabEl || !blobEl) return;
+    const navRect = navEl.getBoundingClientRect();
+    const tabRect = tabEl.getBoundingClientRect();
+    blobEl.style.width = tabRect.width + 'px';
+    blobEl.style.left = (tabRect.left - navRect.left) + 'px';
   }
 
   get currentTitle(): string {

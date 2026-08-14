@@ -1,12 +1,26 @@
+.product-wrap { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.product-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; }
+.product-handle { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.product-name { font-size: 16px; font-weight: 600; color: var(--text); }
+.product-right { display: flex; align-items: center; gap: 10px; }
+.phase-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 500; text-transform: capitalize; }
+.phase-badge.development { background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-bright); }
+.phase-badge.test { background: rgba(90,100,180,0.1); border: 1px solid rgba(90,100,180,0.25); color: #8090d0; }
+.phase-badge.launch { background: var(--success-bg); border: 1px solid rgba(90,158,106,0.3); color: var(--success); }
+.toggle-icon { color: var(--accent-bright); font-size: 18px; font-weight: 300; width: 20px; text-align: center; }
+.section-divider { height: 0.5px; background: var(--accent-border); margin: 0; }
+.product-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+.product-body.open { max-height: 2000px; padding: 14px; }
+
 .phase-bar { display: flex; gap: 6px; margin: 12px 0; }
-.phase-pill { flex:1; text-align:center; font-size: 11px; padding: 6px; border-radius: 6px; background: var(--surface-2); color: var(--text-secondary); }
-.phase-pill.on { background: var(--accent); color: #fff; }
-.phase-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; margin-bottom: 8px; text-transform: capitalize; }
+.phase-pill { flex:1; text-align:center; font-size: 11px; padding: 6px; border-radius: 6px; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-secondary); text-transform: capitalize; }
+.phase-pill.on { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-bright); }
+.phase-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; margin-bottom: 8px; text-transform: capitalize; color: var(--text); }
 .phase-done { font-size: 10px; font-weight: 400; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
-.check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
-.check-item .box { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+.check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; color: var(--text); }
+.check-item .box { width: 16px; height: 16px; border: 1px solid var(--glass-border-strong); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; }
 .check-item .box.on { background: var(--success); border-color: var(--success); color: #fff; }
 .check-item .done { text-decoration: line-through; opacity: 0.5; }
 .check-item .del { margin-left: auto; color: var(--danger); cursor: pointer; }
 .add-item { display: flex; gap: 6px; margin-top: 8px; }
-.revenue { background: var(--success-bg); border-color: var(--success); margin-top: 12px; }
+.revenue { background: var(--success-bg); border-color: rgba(90,158,106,0.3); margin-top: 12px; }

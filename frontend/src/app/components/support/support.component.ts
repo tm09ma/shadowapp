@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -12,11 +12,14 @@ export class SupportComponent implements OnInit {
   messages: { role: string; text: string }[] = [];
   input = ''; loading = false;
 
+  @ViewChild('bottom') bottomEl!: ElementRef;
+
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
     this.api.chatHistory().subscribe(h => {
       this.messages = h.map(m => ({ role: m.role, text: m.content }));
+      this.scrollToBottom();
       this.maybeDailyBriefing();
     });
   }
@@ -31,6 +34,7 @@ export class SupportComponent implements OnInit {
         this.messages.push({ role: 'assistant', text: r.reply });
         localStorage.setItem('lastBriefing', today);
         this.loading = false;
+        this.scrollToBottom();
       });
     }
   }
@@ -40,9 +44,14 @@ export class SupportComponent implements OnInit {
     if (!msg) return;
     this.messages.push({ role: 'user', text: msg });
     this.input = ''; this.loading = true;
+    this.scrollToBottom();
     this.api.chat(msg).subscribe({
-      next: r => { this.messages.push({ role: 'assistant', text: r.reply }); this.loading = false; },
-      error: e => { this.messages.push({ role: 'assistant', text: 'Error: ' + e.message }); this.loading = false; }
+      next: r => { this.messages.push({ role: 'assistant', text: r.reply }); this.loading = false; this.scrollToBottom(); },
+      error: e => { this.messages.push({ role: 'assistant', text: 'Error: ' + e.message }); this.loading = false; this.scrollToBottom(); }
     });
+  }
+
+  scrollToBottom(): void {
+    setTimeout(() => this.bottomEl?.nativeElement.scrollIntoView({ behavior: 'smooth' }), 50);
   }
 }

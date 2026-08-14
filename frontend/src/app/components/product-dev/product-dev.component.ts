@@ -11,22 +11,39 @@ import { Product, ChecklistItem } from '../../models/product.model';
 })
 export class ProductDevComponent implements OnInit {
   products: Product[] = [];
-  openId: number | null = null;
-  checklist: ChecklistItem[] = [];
-  newItemText: { [phase: string]: string } = { development: '', test: '', launch: '' };
+  openIds: Set<number> = new Set();
+  checklistMap = new Map<number, ChecklistItem[]>();
+  creatorHandles = new Map<number, string>();
+  newItemText: { [key: string]: string } = {};
   phases = ['development', 'test', 'launch'];
 
   constructor(private api: ApiService) {}
-  ngOnInit(): void { this.load(); }
+
+  ngOnInit(): void {
+    this.load();
+    this.api.getCreators().subscribe(creators => {
+      creators.forEach(c => { if (c.id) this.creatorHandles.set(c.id, c.handle); });
+    });
+  }
+
   load(): void { this.api.getProducts().subscribe(p => this.products = p); }
 
-  open(p: Product): void {
-    this.openId = p.id!;
-    this.api.getChecklist(p.id!).subscribe(c => this.checklist = c);
+  toggleProduct(id: number): void {
+    if (this.openIds.has(id)) {
+      this.openIds.delete(id);
+      return;
+    }
+    this.openIds.add(id);
+    if (!this.checklistMap.has(id)) {
+      this.api.getChecklist(id).subscribe(c => this.checklistMap.set(id, c));
+    }
   }
-  get openProduct(): Product | undefined { return this.products.find(p => p.id === this.openId); }
 
-  itemsFor(phase: string): ChecklistItem[] { return this.checklist.filter(i => i.phase === phase); }
+  handleFor(p: Product): string { return this.creatorHandles.get(p.creatorId) || ('#' + p.creatorId); }
+
+  itemsFor(p: Product, phase: string): ChecklistItem[] {
+    return (this.checklistMap.get(p.id!) || []).filter(i => i.phase === phase);
+  }
   isLive(p: Product): boolean { return p.stage === 'launch'; }
 
   save(p: Product): void { if (p.id) this.api.updateProduct(p.id, p).subscribe(); }
@@ -34,15 +51,29 @@ export class ProductDevComponent implements OnInit {
   togglePhaseDone(p: Product, phase: string, done: boolean): void {
     if (p.id) this.api.markPhaseDone(p.id, phase, done).subscribe(u => Object.assign(p, u));
   }
-  addItem(phase: string): void {
-    const text = this.newItemText[phase]?.trim();
-    if (!text || !this.openId) return;
-    this.api.addChecklistItem(this.openId, phase, text).subscribe(i => {
-      this.checklist.push(i); this.newItemText[phase] = '';
+
+  itemKey(p: Product, phase: string): string { return p.id + ':' + phase; }
+
+  addItem(p: Product, phase: string): void {
+    const key = this.itemKey(p, phase);
+    const text = this.newItemText[key]?.trim();
+    if (!text || !p.id) return;
+    this.api.addChecklistItem(p.id, phase, text).subscribe(i => {
+      const list = this.checklistMap.get(p.id!) || [];
+      list.push(i);
+      this.checklistMap.set(p.id!, list);
+      this.newItemText[key] = '';
     });
   }
-  toggleItem(i: ChecklistItem): void { if (i.id) this.api.toggleChecklistItem(i.id).subscribe(u => i.done = u.done); }
-  deleteItem(i: ChecklistItem): void { if (i.id) this.api.deleteChecklistItem(i.id).subscribe(() => this.checklist = this.checklist.filter(x => x.id !== i.id)); }
+  toggleItem(p: Product, i: ChecklistItem): void {
+    if (i.id) this.api.toggleChecklistItem(i.id).subscribe(u => i.done = u.done);
+  }
+  deleteItem(p: Product, i: ChecklistItem): void {
+    if (i.id) this.api.deleteChecklistItem(i.id).subscribe(() => {
+      const list = (this.checklistMap.get(p.id!) || []).filter(x => x.id !== i.id);
+      this.checklistMap.set(p.id!, list);
+    });
+  }
 
   phaseDoneFlag(p: Product, phase: string): boolean {
     return phase === 'development' ? p.devDone : phase === 'test' ? p.testDone : p.launchDone;

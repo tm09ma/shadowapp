@@ -8,10 +8,51 @@
     <router-outlet></router-outlet>
   </main>
 
-  <nav class="tab-bar">
-    <a *ngFor="let tab of tabs" [routerLink]="'/' + tab.path" routerLinkActive="active" class="tab">
-      <span class="tab-dot"></span>
-      <span class="tab-label">{{ tab.label }}</span>
+  <nav class="pill-nav" #pillNav>
+    <div class="pill-blob" #pillBlob></div>
+    <a *ngFor="let tab of tabs; let i = index"
+       [routerLink]="'/' + tab.path"
+       routerLinkActive="active"
+       class="pill-tab"
+       (click)="updateBlob(i)"
+       #pillTabs>
+      <svg viewBox="0 0 24 24" [ngSwitch]="tab.path">
+        <ng-container *ngSwitchCase="'dashboard'">
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5 10.5V19a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-8.5" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'outreach'">
+          <circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none" />
+          <path d="M8.5 15.5a5 5 0 0 1 7 0" />
+          <path d="M5.5 12a9 9 0 0 1 13 0" />
+          <path d="M2.5 8.5a13 13 0 0 1 19 0" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'dm-generator'">
+          <path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+          <line x1="7" y1="9" x2="17" y2="9" />
+          <line x1="7" y1="13" x2="14" y2="13" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'product'">
+          <path d="M4 10l8-4 8 4-8 4-8-4Z" />
+          <path d="M4 10v6l8 4 8-4v-6" />
+          <path d="M12 14v6" />
+          <circle cx="12" cy="4" r="1.2" fill="currentColor" stroke="none" />
+          <path d="M18 2.3l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5Z" fill="currentColor" stroke="none" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'journal'">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z" />
+          <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13Z" />
+          <line x1="14.5" y1="8" x2="18" y2="8" />
+          <line x1="14.5" y1="11.5" x2="18" y2="11.5" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'calls'">
+          <path d="M6.5 3.5 9 3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5-.5 2.5a2 2 0 0 1-2 1.5A15 15 0 0 1 5 6.5a2 2 0 0 1 1.5-3Z" />
+        </ng-container>
+        <ng-container *ngSwitchCase="'support'">
+          <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" />
+          <path d="m9 12 2 2 4-4" />
+        </ng-container>
+      </svg>
     </a>
   </nav>
 </div>

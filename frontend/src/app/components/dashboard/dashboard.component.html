@@ -9,7 +9,7 @@
   <div class="card stat"><div class="stat-label">Sales</div><div class="stat-val">${{ kpis.sales }}</div></div>
   <div class="card stat"><div class="stat-label">Pipeline</div><div class="stat-val">{{ kpis.pipeline }}</div></div>
   <div class="card stat"><div class="stat-label">Won</div><div class="stat-val">{{ kpis.won }}</div></div>
-  <div class="card stat"><div class="stat-label">Reply rate</div><div class="stat-val">{{ kpis.replyRate }}%</div></div>
+  <div class="card stat clickable" (click)="openAnalytics()"><div class="stat-label">Reply rate</div><div class="stat-val">{{ kpis.replyRate }}%</div></div>
   <div class="card stat streak"><div class="stat-label">Streak</div><div class="stat-val">{{ daily.streak }}</div></div>
 </div>
 
@@ -19,7 +19,7 @@
     <div class="challenge-title">Daily challenge</div>
     <div *ngIf="daily.goals.length === 0" class="muted">Set your goals in Settings.</div>
     <div *ngFor="let g of daily.goals" class="check-row" [class.on]="g.done" (click)="toggleGoal(g)">
-      <span class="box">{{ g.done ? '\u2713' : '' }}</span>
+      <span class="box">{{ g.done ? '✓' : '' }}</span>
       {{ g.label }}
       <span *ngIf="g.type==='dms'" class="count">{{ daily.dmsSentToday }}/{{ daily.dmsGoal }}</span>
       <span *ngIf="g.autoTracked" class="auto">auto</span>
@@ -27,7 +27,49 @@
     <button *ngIf="daily.allDone" class="success" style="margin-top:10px;" (click)="complete()">Complete challenge — Streak +1</button>
   </div>
   <div *ngIf="daily.challengeCompleted" class="card done-card">
-    <div class="big-check">\u2713</div>
+    <div class="big-check">✓</div>
     <div class="done-text">Daily Challenge</div>
+  </div>
+</div>
+
+<!-- Quote -->
+<div class="quote-card">
+  <p class="quote-text">{{ todayQuote }}</p>
+</div>
+
+<!-- Analytics Overlay -->
+<div class="analytics-overlay" [class.open]="analyticsOpen">
+  <div class="analytics-header">
+    <button class="close-btn" (click)="closeAnalytics()">&#x2715;</button>
+    <div class="analytics-title">Analytics</div>
+  </div>
+  <div class="analytics-scroll">
+    <!-- Reply Rate Hero -->
+    <div class="analytics-hero">
+      <div class="hero-label">Reply rate</div>
+      <div class="hero-val">{{ kpis.replyRate }}%</div>
+    </div>
+    <!-- Charts -->
+    <div class="chart-section">
+      <div class="chart-title">Reply rate over time</div>
+      <canvas #lineChartCanvas></canvas>
+    </div>
+    <div class="chart-section">
+      <div class="chart-title">DMs sent per week</div>
+      <canvas #barChartCanvas></canvas>
+    </div>
+    <div class="chart-section">
+      <div class="chart-title">Best performing niche</div>
+      <canvas #donutChartCanvas></canvas>
+    </div>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-label">Total DMs</div><div class="stat-val">{{ totalDms }}</div></div>
+      <div class="stat-item"><div class="stat-label">Total replies</div><div class="stat-val">{{ totalReplies }}</div></div>
+      <div class="stat-item"><div class="stat-label">Won</div><div class="stat-val">{{ wonCount }}</div></div>
+      <div class="stat-item"><div class="stat-label">Lost</div><div class="stat-val">{{ lostCount }}</div></div>
+      <div class="stat-item"><div class="stat-label">FU reply rate</div><div class="stat-val">{{ fuReplyRate }}%</div></div>
+      <div class="stat-item"><div class="stat-label">Best version</div><div class="stat-val">{{ bestVersion }}</div></div>
+    </div>
   </div>
 </div>

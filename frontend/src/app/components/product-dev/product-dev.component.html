@@ -1,17 +1,18 @@
 <div *ngIf="products.length === 0" class="card muted" style="text-align:center;">No won creators yet. Mark a call as Won.</div>
 
-<!-- List -->
-<div *ngIf="openId === null">
-  <div *ngFor="let p of products" class="card row" style="margin-bottom:8px; cursor:pointer;" (click)="open(p)">
-    <div><div class="handle">{{ p.name || 'Unnamed product' }}</div><div class="sub">{{ p.stage }}</div></div>
-    <span style="color:var(--text-secondary);">›</span>
+<div *ngFor="let p of products" class="product-wrap">
+  <div class="product-header" (click)="toggleProduct(p.id!)">
+    <div class="product-meta">
+      <div class="product-handle">{{ handleFor(p) }}</div>
+      <div class="product-name">{{ p.name || 'Unnamed product' }}</div>
+    </div>
+    <div class="product-right">
+      <span class="phase-badge" [class]="p.stage">{{ p.stage }}</span>
+      <span class="toggle-icon">{{ openIds.has(p.id!) ? '−' : '+' }}</span>
+    </div>
   </div>
-</div>
-
-<!-- Detail -->
-<div *ngIf="openProduct as p">
-  <button class="secondary small" (click)="openId=null" style="margin-bottom:12px;">← Back</button>
-  <div class="card">
+  <div class="section-divider" *ngIf="openIds.has(p.id!)"></div>
+  <div class="product-body" [class.open]="openIds.has(p.id!)">
     <input [(ngModel)]="p.name" placeholder="Product name" (blur)="save(p)" style="margin-bottom:8px;" />
     <input [(ngModel)]="p.type" placeholder="Type" (blur)="save(p)" style="margin-bottom:8px;" />
 
@@ -20,7 +21,7 @@
       <span *ngFor="let ph of phases" class="phase-pill" [class.on]="p.stage===ph">{{ ph }}</span>
     </div>
 
-    <!-- Checklist per phase (current phase) -->
+    <!-- Checklist for current phase -->
     <div class="phase-section">
       <div class="phase-head">
         {{ p.stage }} checklist
@@ -29,18 +30,18 @@
           whole phase done
         </label>
       </div>
-      <div *ngFor="let i of itemsFor(p.stage)" class="check-item">
-        <span (click)="toggleItem(i)" class="box" [class.on]="i.done">{{ i.done ? '\u2713' : '' }}</span>
+      <div *ngFor="let i of itemsFor(p, p.stage)" class="check-item">
+        <span (click)="toggleItem(p, i)" class="box" [class.on]="i.done">{{ i.done ? '✓' : '' }}</span>
         <span [class.done]="i.done">{{ i.text }}</span>
-        <span class="del" (click)="deleteItem(i)">×</span>
+        <span class="del" (click)="deleteItem(p, i)">×</span>
       </div>
       <div class="add-item">
-        <input [(ngModel)]="newItemText[p.stage]" placeholder="Add checklist item" (keyup.enter)="addItem(p.stage)" />
-        <button class="small secondary" (click)="addItem(p.stage)">+</button>
+        <input [(ngModel)]="newItemText[itemKey(p, p.stage)]" placeholder="Add checklist item" (keyup.enter)="addItem(p, p.stage)" />
+        <button class="small secondary" (click)="addItem(p, p.stage)">+</button>
       </div>
     </div>
 
-    <button *ngIf="p.stage !== 'launch'" class="warning" style="margin-top:12px;" (click)="advance(p)">
+    <button *ngIf="p.stage !== 'launch'" style="margin-top:12px;" (click)="advance(p)">
       Advance to next phase
     </button>
 
