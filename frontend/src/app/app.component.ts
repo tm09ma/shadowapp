@@ -1,5 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import {
+  RouterOutlet, RouterLink, RouterLinkActive, Router,
+  NavigationStart, NavigationEnd, NavigationCancel, NavigationError
+} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ApiService } from './services/api.service';
@@ -26,11 +29,37 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('pillBlob') pillBlob?: ElementRef<HTMLElement>;
   @ViewChildren('pillTabs') pillTabs?: QueryList<ElementRef<HTMLElement>>;
 
-  constructor(public router: Router, private api: ApiService) {}
+  isLoading = false;
+  progressDone = false;
+  appLoaded = false;
+
+  constructor(public router: Router, private api: ApiService) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.progressDone = false;
+        this.isLoading = true;
+      }
+      if (event instanceof NavigationEnd ||
+          event instanceof NavigationCancel ||
+          event instanceof NavigationError) {
+        setTimeout(() => {
+          this.isLoading = false;
+          this.progressDone = true;
+          setTimeout(() => { this.progressDone = false; }, 500);
+        }, 200);
+      }
+    });
+  }
 
   ngOnInit(): void {
+    this.api.getSettings().subscribe(s => {
+      document.body.classList.toggle('light', !s.darkMode);
+    });
+
     // Auto-Reject beim Start (bis Deployment)
     this.api.autoReject().subscribe();
+
+    setTimeout(() => this.appLoaded = true, 100);
 
     // Blob muss auch bei direktem URL-Aufruf / Back-Forward am richtigen Tab landen.
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {

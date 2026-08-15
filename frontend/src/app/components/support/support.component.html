@@ -1,10 +1,30 @@
-<div class="chat">
-  <div *ngIf="messages.length === 0 && !loading" class="card muted" style="text-align:center;">Ask your mentor anything.</div>
-  <div *ngFor="let m of messages" class="bubble" [class.user]="m.role==='user'" [class.assistant]="m.role==='assistant'">{{ m.text }}</div>
-  <div class="typing" *ngIf="loading"><span></span><span></span><span></span></div>
-  <div #bottom></div>
-</div>
-<div class="input-row">
-  <input [(ngModel)]="input" (keyup.enter)="send()" placeholder="Ask..." />
-  <button style="width:auto;" (click)="send()">Send</button>
+<div class="support-wrapper">
+  <div class="chat-scroll">
+    <div *ngIf="messages.length === 0 && !loading"
+         class="muted" style="text-align:center;padding:40px 0;">
+      Ask your mentor anything.
+    </div>
+    <div *ngFor="let m of messages"
+         class="bubble"
+         [class.user]="m.role==='user'"
+         [class.assistant]="m.role==='assistant'">
+      {{ m.text }}
+    </div>
+    <div class="typing" *ngIf="loading">
+      <span></span><span></span><span></span>
+    </div>
+    <div #bottom></div>
+  </div>
+  <div class="input-row">
+    <input [(ngModel)]="input"
+           (keyup.enter)="send()"
+           placeholder="Ask your mentor..." />
+    <button style="width:auto;" (click)="send()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
 </div>
