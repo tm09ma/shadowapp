@@ -75,7 +75,7 @@ class SupportChatService(
     // Baut die MessageCreateParams (Modell, System-Prompt, Verlauf) fuer einen Chat-Call
     private fun buildMessageParams(history: List<ChatMessage>): MessageCreateParams {
         val builder = MessageCreateParams.builder()
-            .model("claude-opus-4-8")
+            .model("claude-haiku-4-5-20251001")
             .maxTokens(1000)
             .system(systemPrompt())
         history.forEach {
@@ -132,7 +132,7 @@ class SupportChatService(
     // Tagesnachricht: Mentor gibt proaktiv Tagesueberblick
     fun dailyBriefing(): String {
         val builder = MessageCreateParams.builder()
-            .model("claude-opus-4-8")
+            .model("claude-haiku-4-5-20251001")
             .maxTokens(600)
             .system(systemPrompt())
             .addUserMessage(
