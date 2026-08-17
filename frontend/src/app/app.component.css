@@ -88,8 +88,7 @@
 /* Floating Pill Nav */
 .pill-nav {
   position: fixed;
-  bottom: 0;
-  bottom: env(safe-area-inset-bottom);
+  bottom: calc(4px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
