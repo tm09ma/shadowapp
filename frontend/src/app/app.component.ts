@@ -34,6 +34,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   progressDone = false;
   appLoaded = false;
 
+  isDragging = false;
+  dragStartX = 0;
+  dragCurrentX = 0;
+  dragBlobLeft = 0;
+
   constructor(public router: Router, private api: ApiService, public healthService: HealthService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
@@ -77,6 +82,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     // Erst nach dem ersten Layout-Tick messen, sonst sind die Tab-Rects noch 0.
     setTimeout(() => this.updateBlob(this.activeIndex()), 0);
+
+    // touchmove muss passive:false sein damit preventDefault() das Scrollen
+    // waehrend des Drags verhindert - das geht nicht ueber die (touchmove)
+    // Template-Bindung (die ist immer passive), daher hier per addEventListener.
+    const nav = document.getElementById('pillNav');
+    if (nav) {
+      nav.addEventListener('touchmove',
+        (e) => this.onNavTouchMove(e as TouchEvent),
+        { passive: false }
+      );
+    }
   }
 
   activeIndex(): number {
@@ -94,6 +110,62 @@ export class AppComponent implements OnInit, AfterViewInit {
     const tabRect = tabEl.getBoundingClientRect();
     blobEl.style.width = tabRect.width + 'px';
     blobEl.style.left = (tabRect.left - navRect.left) + 'px';
+  }
+
+  onNavTouchStart(event: TouchEvent): void {
+    this.isDragging = true;
+    this.dragStartX = event.touches[0].clientX;
+    this.dragCurrentX = this.dragStartX;
+  }
+
+  onNavTouchMove(event: TouchEvent): void {
+    if (!this.isDragging) return;
+    event.preventDefault();
+    this.dragCurrentX = event.touches[0].clientX;
+
+    // Blob live mit Finger mitbewegen
+    const nav = document.getElementById('pillNav');
+    const blob = document.getElementById('pillBlob');
+    if (!nav || !blob) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const tabWidth = navRect.width / this.tabs.length;
+    const fingerX = this.dragCurrentX - navRect.left;
+
+    // Blob zentriert auf Finger setzen (innerhalb Nav-Grenzen)
+    const blobWidth = tabWidth;
+    const maxLeft = navRect.width - blobWidth;
+    const newLeft = Math.max(0, Math.min(fingerX - blobWidth / 2, maxLeft));
+
+    blob.style.transition = 'none'; // Kein smooth waehrend Drag
+    blob.style.left = newLeft + 'px';
+    blob.style.width = blobWidth + 'px';
+  }
+
+  onNavTouchEnd(event: TouchEvent): void {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+
+    // Welcher Tab ist unter dem Finger?
+    const nav = document.getElementById('pillNav');
+    if (!nav) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const fingerX = this.dragCurrentX - navRect.left;
+    const tabWidth = navRect.width / this.tabs.length;
+    const tabIndex = Math.floor(fingerX / tabWidth);
+    const clampedIndex = Math.max(0, Math.min(tabIndex, this.tabs.length - 1));
+
+    // Blob wieder smooth machen und zum Tab snappen
+    const blob = document.getElementById('pillBlob');
+    if (blob) blob.style.transition = '';
+
+    // Zum Tab navigieren
+    const targetTab = this.tabs[clampedIndex];
+    if (targetTab) {
+      this.router.navigate(['/' + targetTab.path]);
+      this.updateBlob(clampedIndex);
+    }
   }
 
   get currentTitle(): string {

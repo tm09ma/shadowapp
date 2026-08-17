@@ -31,8 +31,10 @@
     <router-outlet></router-outlet>
   </main>
 
-  <nav class="pill-nav" #pillNav>
-    <div class="pill-blob" #pillBlob></div>
+  <nav class="pill-nav" #pillNav id="pillNav"
+       (touchstart)="onNavTouchStart($event)"
+       (touchend)="onNavTouchEnd($event)">
+    <div class="pill-blob" #pillBlob id="pillBlob"></div>
     <a *ngFor="let tab of tabs; let i = index"
        [routerLink]="'/' + tab.path"
        routerLinkActive="active"
