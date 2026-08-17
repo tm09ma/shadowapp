@@ -5,6 +5,9 @@ import com.shadow.tracker.dto.DmResponse
 import com.shadow.tracker.entity.ChatMessage
 import com.shadow.tracker.service.DmGeneratorService
 import com.shadow.tracker.service.SupportChatService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.*
 
 data class ChatRequest(val message: String)
@@ -23,6 +26,10 @@ class AiController(
     @PostMapping("/chat")
     fun chat(@RequestBody request: ChatRequest): ChatResponse =
         ChatResponse(supportChatService.chat(request.message))
+
+    @GetMapping("/chat-stream", produces = ["text/event-stream"])
+    fun chatStream(@RequestParam message: String): Flow<ServerSentEvent<String>> =
+        supportChatService.chatStream(message).map { delta -> ServerSentEvent.builder(delta).build() }
 
     @GetMapping("/chat-history")
     fun history(): List<ChatMessage> = supportChatService.getHistory()

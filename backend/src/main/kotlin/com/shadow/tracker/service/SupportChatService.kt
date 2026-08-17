@@ -4,6 +4,10 @@ import com.anthropic.client.AnthropicClient
 import com.anthropic.models.messages.MessageCreateParams
 import com.shadow.tracker.entity.ChatMessage
 import com.shadow.tracker.repository.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import org.springframework.stereotype.Service
 
 // ============================================================
@@ -68,13 +72,8 @@ class SupportChatService(
         """.trimIndent()
     }
 
-    fun chat(userMessage: String): String {
-        // User-Nachricht speichern
-        chatRepo.save(ChatMessage(role = "user", content = userMessage))
-
-        // letzte 20 als Verlauf
-        val history = chatRepo.findTop20ByOrderByCreatedAtDesc().reversed()
-
+    // Baut die MessageCreateParams (Modell, System-Prompt, Verlauf) fuer einen Chat-Call
+    private fun buildMessageParams(history: List<ChatMessage>): MessageCreateParams {
         val builder = MessageCreateParams.builder()
             .model("claude-opus-4-8")
             .maxTokens(1000)
@@ -83,14 +82,48 @@ class SupportChatService(
             if (it.role == "user") builder.addUserMessage(it.content)
             else builder.addAssistantMessage(it.content)
         }
+        return builder.build()
+    }
 
-        val message = anthropicClient.messages().create(builder.build())
+    fun chat(userMessage: String): String {
+        // User-Nachricht speichern
+        chatRepo.save(ChatMessage(role = "user", content = userMessage))
+
+        // letzte 20 als Verlauf
+        val history = chatRepo.findTop20ByOrderByCreatedAtDesc().reversed()
+        val params = buildMessageParams(history)
+
+        val message = anthropicClient.messages().create(params)
         val reply = message.content()
             .mapNotNull { it.text().orElse(null)?.text() }
             .joinToString("")
 
         chatRepo.save(ChatMessage(role = "assistant", content = reply))
         return reply
+    }
+
+    // Streamt die Antwort Wort-fuer-Wort als Flow<String> (fuer SSE im Controller).
+    // Der Anthropic-Client liefert dazu einen blockierenden java.util.stream.Stream von
+    // RawMessageStreamEvent - wir picken nur die reinen Text-Deltas raus und emitten sie.
+    fun chatStream(userMessage: String): Flow<String> {
+        chatRepo.save(ChatMessage(role = "user", content = userMessage))
+        val history = chatRepo.findTop20ByOrderByCreatedAtDesc().reversed()
+        val params = buildMessageParams(history)
+
+        return flow {
+            val fullResponse = StringBuilder()
+            anthropicClient.messages().createStreaming(params).use { stream ->
+                for (event in stream.stream()) {
+                    val chunk = event.contentBlockDelta().orElse(null)
+                        ?.delta()?.text()?.orElse(null)?.text()
+                    if (chunk != null) {
+                        fullResponse.append(chunk)
+                        emit(chunk)
+                    }
+                }
+            }
+            chatRepo.save(ChatMessage(role = "assistant", content = fullResponse.toString()))
+        }.flowOn(Dispatchers.IO)
     }
 
     fun getHistory(): List<ChatMessage> =

@@ -1,3 +1,26 @@
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+.skeleton-card {
+  height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(200,146,42,0.05) 0%,
+    rgba(200,146,42,0.12) 50%,
+    rgba(200,146,42,0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .period-switch { display: flex; gap: 6px; margin-bottom: 14px; }
 .period-switch button { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-secondary); padding: 7px; font-size: 12px; }
 .period-switch button.on { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-bright); }

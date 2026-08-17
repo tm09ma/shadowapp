@@ -23,6 +23,10 @@
 
   <div class="progress-bar" [class.active]="isLoading" [class.done]="progressDone"></div>
 
+  <div class="wakeup-banner" *ngIf="healthService.isWakingUp">
+    <span>⚡</span> Server is starting up — this takes about 30 seconds...
+  </div>
+
   <main class="content" [class.loaded]="appLoaded">
     <router-outlet></router-outlet>
   </main>

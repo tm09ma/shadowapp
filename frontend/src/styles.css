@@ -130,3 +130,32 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .handle { font-size: 14px; font-weight: 600; color: var(--text); }
 .sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
 .row { display: flex; justify-content: space-between; align-items: center; }
+
+/* Splash screen */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #0d0b08;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease;
+}
+#splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+#splash-s {
+  font-size: 80px;
+  font-weight: 700;
+  color: #f0b84a;
+  font-family: system-ui, -apple-system, sans-serif;
+  animation: splashPulse 1.5s ease forwards;
+}
+@keyframes splashPulse {
+  0% { opacity: 0; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.05); }
+  70% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}

@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { ApiService } from '../../services/api.service';
 import { Creator } from '../../models/creator.model';
@@ -19,6 +20,7 @@ const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+  loading = true;
   kpis: any = { sales: 0, pipeline: 0, won: 0, replyRate: 0 };
   period = 'total';
   daily: any = { goals: [], allDone: false, challengeCompleted: false, streak: 0, dmsSentToday: 0, dmsGoal: 15 };
@@ -67,8 +69,18 @@ export class DashboardComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.loadKpis();
-    this.loadDaily();
+    this.loading = true;
+    forkJoin({
+      kpis: this.api.getKpis(this.period),
+      daily: this.api.getDailyStatus()
+    }).subscribe({
+      next: ({ kpis, daily }) => {
+        this.kpis = kpis;
+        this.daily = daily;
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
     this.pickQuote();
     this.loadAnalytics();
   }

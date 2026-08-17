@@ -51,6 +51,12 @@ dependencies {
     // --- Der offizielle Anthropic (Claude) Java-Client ---
     implementation("com.anthropic:anthropic-java:0.8.0")
 
+    // --- Kotlin Coroutines: fuer den SSE-Chat-Stream (Flow<String>) ---
+    // spring-web bringt die SSE-Codecs (org.springframework.http.codec.ServerSentEvent)
+    // bereits mit spring-boot-starter-web mit, kein spring-boot-starter-webflux noetig.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
+
     // --- Zum Testen ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // H2: schnelle In-Memory-Datenbank nur fuer Tests

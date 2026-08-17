@@ -1,4 +1,33 @@
 .creator-card { background: var(--accent-bg); border-color: var(--accent); margin-bottom: 16px; }
+.dm-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 0;
+}
+.dm-loading-dots {
+  display: flex;
+  gap: 8px;
+}
+.dm-loading-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dmPulse 1.2s ease-in-out infinite;
+}
+.dm-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.dm-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dmPulse {
+  0%,60%,100% { opacity:0.2; transform:scale(0.7); }
+  30% { opacity:1; transform:scale(1); }
+}
+.dm-loading-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-style: italic;
+}
 .upload-btn { display: block; text-align: center; margin-top: 10px; padding: 12px; background: var(--surface-2); border-radius: 8px; cursor: pointer; font-size: 14px; }
 .preview-row { display: flex; gap: 8px; margin-top: 10px; }
 .preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 0.5px solid var(--border); }

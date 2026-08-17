@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-support', standalone: true,
@@ -39,16 +40,32 @@ export class SupportComponent implements OnInit {
     }
   }
 
-  send(): void {
-    const msg = this.input.trim();
-    if (!msg) return;
-    this.messages.push({ role: 'user', text: msg });
+  sendStreaming(msg: string): void {
+    const trimmed = msg.trim();
+    if (!trimmed) return;
+
+    this.messages.push({ role: 'user', text: trimmed });
     this.input = ''; this.loading = true;
     this.scrollToBottom();
-    this.api.chat(msg).subscribe({
-      next: r => { this.messages.push({ role: 'assistant', text: r.reply }); this.loading = false; this.scrollToBottom(); },
-      error: e => { this.messages.push({ role: 'assistant', text: 'Error: ' + e.message }); this.loading = false; this.scrollToBottom(); }
-    });
+
+    // Leere Antwort-Bubble vorbereiten, waechst mit jedem Chunk
+    const assistantMsg = { role: 'assistant', text: '' };
+    this.messages.push(assistantMsg);
+
+    // Native EventSource kann keine Header setzen - Token daher als Query-Param
+    // (AuthFilter im Backend akzeptiert ihn dort als Fallback zum X-Auth-Token Header).
+    const url = `${environment.apiUrl}/api/ai/chat-stream?message=${encodeURIComponent(trimmed)}&token=${encodeURIComponent(environment.authToken)}`;
+    const es = new EventSource(url);
+
+    es.onmessage = (event) => {
+      assistantMsg.text += event.data;
+      this.scrollToBottom();
+    };
+    es.onerror = () => {
+      es.close();
+      this.loading = false;
+      this.scrollToBottom();
+    };
   }
 
   scrollToBottom(): void {

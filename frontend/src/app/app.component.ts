@@ -6,6 +6,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ApiService } from './services/api.service';
+import { HealthService } from './services/health.service';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +34,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   progressDone = false;
   appLoaded = false;
 
-  constructor(public router: Router, private api: ApiService) {
+  constructor(public router: Router, private api: ApiService, public healthService: HealthService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         this.progressDone = false;
@@ -52,12 +53,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // Settings laden
     this.api.getSettings().subscribe(s => {
       document.body.classList.toggle('light', !s.darkMode);
     });
-
-    // Auto-Reject beim Start (bis Deployment)
+    // Auto-reject
     this.api.autoReject().subscribe();
+    // Kern-Daten vorladen (Cache befuellen) - macht Tab-Wechsel schneller
+    this.api.getCreators().subscribe();
+    this.api.getKpis('total').subscribe();
+    this.api.getGoals().subscribe();
+    // Health check
+    this.healthService.checkHealth();
 
     setTimeout(() => this.appLoaded = true, 100);
 

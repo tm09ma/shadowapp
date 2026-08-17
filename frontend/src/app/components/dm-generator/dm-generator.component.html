@@ -23,9 +23,13 @@
     <div *ngIf="previews.length" class="preview-row">
       <img *ngFor="let p of previews" [src]="p" class="preview-img" alt="" />
     </div>
-    <button (click)="generate()" [disabled]="loading" style="margin-top:10px;">
-      {{ loading ? 'Claude is writing...' : 'Generate DMs' }}
-    </button>
+    <button *ngIf="!loading" (click)="generate()" style="margin-top:10px;">Generate DMs</button>
+    <div *ngIf="loading" class="dm-loading">
+      <div class="dm-loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="dm-loading-text">Claude is crafting your DMs...</div>
+    </div>
     <div *ngIf="error" style="color:var(--danger); font-size:12px; margin-top:10px;">{{ error }}</div>
   </div>
 

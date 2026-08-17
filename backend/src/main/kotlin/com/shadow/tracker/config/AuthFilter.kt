@@ -18,6 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter
 // der Umgebungsvariable APP_TOKEN entsprechen, sonst 401.
 // CORS-Preflight-Requests (OPTIONS) werden immer durchgelassen,
 // sonst kann der Browser nicht einmal die Preflight-Antwort lesen.
+// Fallback auf ?token=... als Query-Parameter: der Browser-eigene
+// EventSource (fuer den SSE-Chat-Stream) kann keine custom Header
+// setzen, daher muss der Token dort in der URL mitgegeben werden.
 // ============================================================
 
 class AuthFilter(private val appToken: String) : OncePerRequestFilter() {
@@ -31,7 +34,7 @@ class AuthFilter(private val appToken: String) : OncePerRequestFilter() {
             return
         }
 
-        val token = request.getHeader("X-Auth-Token")
+        val token = request.getHeader("X-Auth-Token") ?: request.getParameter("token")
         if (token == null || token != appToken) {
             response.status = HttpServletResponse.SC_UNAUTHORIZED
             response.contentType = MediaType.APPLICATION_JSON_VALUE
