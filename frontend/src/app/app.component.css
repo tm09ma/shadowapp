@@ -88,21 +88,22 @@
 /* Floating Pill Nav */
 .pill-nav {
   position: fixed;
-  bottom: calc(6px + env(safe-area-inset-bottom));
+  bottom: env(safe-area-inset-bottom, 0px);
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 400px;
   background: rgba(14,11,6,0.96);
-  border: 1px solid var(--glass-border-strong);
+  border: 1px solid rgba(200,160,60,0.22);
   border-radius: 100px;
-  padding: 8px 5px calc(6px + env(safe-area-inset-bottom));
+  padding: 5px;
   display: flex;
   align-items: center;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   z-index: 100;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  height: 58px;
 }
 .pill-blob {
   position: absolute;
