@@ -95,7 +95,7 @@
   max-width: 400px;
   background: rgba(14,11,6,0.96);
   border: 1px solid var(--glass-border-strong);
-  border-radius: 100px 100px 0 0;
+  border-radius: 100px;
   padding: 8px 5px calc(6px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
