@@ -107,6 +107,12 @@ export class OutreachComponent implements OnInit {
 
   pullDaily(): void { this.api.pullDaily().subscribe(() => this.load()); }
   markReady(c: Creator): void { if (c.id) this.api.updateStage(c.id, 'dm_ready').subscribe(() => this.load()); }
+  backToEngage(c: Creator): void { if (c.id) this.api.updateStage(c.id, 'engage').subscribe(() => this.load()); }
+  deleteCreatorConfirm(c: Creator): void {
+    if (!c.id) return;
+    if (!confirm(`Remove ${c.handle} from your pipeline?`)) return;
+    this.api.deleteCreator(c.id).subscribe(() => this.load());
+  }
   goGenerate(c: Creator): void {
     sessionStorage.setItem('selectedCreator', JSON.stringify(c));
     this.router.navigate(['/dm-generator']);

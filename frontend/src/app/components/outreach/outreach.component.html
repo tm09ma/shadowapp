@@ -45,7 +45,10 @@
           <div class="handle">{{ c.handle }}</div>
           <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }} · <span style="color:var(--accent-bright);">Day {{ dayCount(c) }}</span></div>
         </div>
-        <button class="small secondary" (click)="markReady(c)">Ready for DM</button>
+        <div class="active-btns">
+          <button class="small secondary" (click)="markReady(c)">Ready for DM</button>
+          <button class="small secondary icon-btn" (click)="deleteCreatorConfirm(c)" title="Remove">×</button>
+        </div>
       </div>
     </div>
   </div>
@@ -67,7 +70,7 @@
       <div *ngIf="selectedForDm.size > 0" style="margin-bottom:8px;">
         <button class="success" (click)="markSelectedSent()">Mark {{ selectedForDm.size }} as DM sent</button>
       </div>
-      <div *ngFor="let c of dmReady" class="card row" style="margin-bottom:8px;"
+      <div *ngFor="let c of dmReady" class="card row" style="margin-bottom:8px; align-items:flex-start;"
            [class.selected]="selectedForDm.has(c.id!)">
         <div style="display:flex; align-items:center; gap:10px;">
           <input type="checkbox" style="width:auto;" [checked]="selectedForDm.has(c.id!)" (change)="toggleDmSelect(c.id)" />
@@ -76,7 +79,13 @@
             <div class="sub">{{ c.niche }} · {{ fmtK(c.followers) }}</div>
           </div>
         </div>
-        <button class="small" (click)="goGenerate(c)">Generate</button>
+        <div class="dm-ready-actions">
+          <button class="small" (click)="goGenerate(c)">Generate</button>
+          <div class="active-btns">
+            <button class="small secondary" (click)="backToEngage(c)">← Back</button>
+            <button class="small secondary icon-btn" (click)="deleteCreatorConfirm(c)" title="Remove">×</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
