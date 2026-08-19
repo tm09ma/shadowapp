@@ -13,6 +13,7 @@ import com.shadow.tracker.dto.DmResponse
 import com.shadow.tracker.dto.DmVersion
 import com.shadow.tracker.repository.CreatorRepository
 import com.shadow.tracker.repository.JournalRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 // ============================================================
@@ -30,6 +31,7 @@ class DmGeneratorService(
 ) {
     private val mapper = ObjectMapper().registerKotlinModule()
     private val PERSONAL_THRESHOLD = 105
+    private val log = LoggerFactory.getLogger(DmGeneratorService::class.java)
 
     private val baseRules = """
         You write Instagram DMs to creators to start genuine conversations.
@@ -165,6 +167,11 @@ class DmGeneratorService(
             }
             add(ContentBlockParam.ofText(TextBlockParam.builder().text(userText).build()))
         }
+
+        log.info(
+            "DM generation for {}: {} screenshot(s) received, {} image block(s) attached to the Claude request",
+            request.handle, request.screenshots.size, contentBlocks.count { it.isImage() }
+        )
 
         val params = MessageCreateParams.builder()
             .model("claude-opus-4-8")
