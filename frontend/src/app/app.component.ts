@@ -4,6 +4,7 @@ import {
   NavigationStart, NavigationEnd, NavigationCancel, NavigationError
 } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ApiService } from './services/api.service';
 import { HealthService } from './services/health.service';
@@ -58,18 +59,23 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Settings laden
-    this.api.getSettings().subscribe(s => {
-      document.body.classList.toggle('light', !s.darkMode);
+    // Settings + Kern-Daten parallel laden (Cache befuellen) - macht Tab-Wechsel schneller
+    forkJoin({
+      settings: this.api.getSettings(),
+      creators: this.api.getCreators(),
+      kpis: this.api.getKpis('total'),
+      goals: this.api.getGoals()
+    }).subscribe(({ settings }) => {
+      document.body.classList.toggle('light', !settings.darkMode);
     });
     // Auto-reject
     this.api.autoReject().subscribe();
-    // Kern-Daten vorladen (Cache befuellen) - macht Tab-Wechsel schneller
-    this.api.getCreators().subscribe();
-    this.api.getKpis('total').subscribe();
-    this.api.getGoals().subscribe();
     // Health check
     this.healthService.checkHealth();
+
+    // Keep-Alive: verhindert dass der Render Free-Tier Cold-Start wieder eintritt,
+    // solange die App offen ist. Behebt nicht den allerersten Start des Tages.
+    setInterval(() => this.api.getSettings().subscribe(), 10 * 60 * 1000);
 
     setTimeout(() => this.appLoaded = true, 100);
 

@@ -50,7 +50,12 @@
     </div>
     <div class="card">
       <div class="muted" style="margin-bottom:8px;">Selected: {{ selected }}</div>
-      <textarea [value]="selectedText" rows="4"></textarea>
+      <div class="copy-row">
+        <textarea [value]="selectedText" rows="4"></textarea>
+        <button class="small secondary copy-btn" (click)="copyToClipboard()">
+          {{ copied ? 'Copied!' : 'Copy' }}
+        </button>
+      </div>
       <button style="margin-top:8px;" (click)="markSent()">Mark as sent</button>
       <button class="secondary" style="margin-top:8px;" (click)="result=null">Regenerate</button>
     </div>

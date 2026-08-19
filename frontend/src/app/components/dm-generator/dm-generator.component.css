@@ -44,3 +44,5 @@
 .v-text { font-size: 12px; margin-top: 6px; line-height: 1.5; }
 .v-tip { font-size: 10px; color: var(--warning); margin-top: 6px; }
 .version.personal .v-tip { color: var(--accent); }
+.copy-row { position: relative; }
+.copy-btn { position: absolute; top: 8px; right: 8px; }

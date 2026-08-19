@@ -1,7 +1,11 @@
 package com.shadow.tracker.service
 
 import com.anthropic.client.AnthropicClient
+import com.anthropic.models.messages.Base64ImageSource
+import com.anthropic.models.messages.ContentBlockParam
+import com.anthropic.models.messages.ImageBlockParam
 import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.TextBlockParam
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.shadow.tracker.dto.DmRequest
@@ -38,10 +42,59 @@ class DmGeneratorService(
         - Sound human and curious, never analytical or AI-like
         - Reference something REAL and specific, not a generic niche label
         - Each DM ends with ONE open-ended question
-        - Opener: "Hey [Name], I've been seeing your content lately..." then genuine
-          appreciation, then a specific observation, then an open question
         - Match the creator's energy for length
+
+        SCREENSHOT USAGE:
+        You will receive screenshots of the creator's Instagram profile (bio, recent posts).
+        Extract: their niche, content style, and 3-5 recent post topics. Use this to
+        understand who they are — but do NOT describe what you see literally in the DM.
+
+        CONTEXT FIELD:
+        If the user provides a "context" note, treat it as ONE small detail to naturally
+        weave into ONE part of the DM — never as the entire theme or subject of the
+        message. The DM must still feel varied and draw from the creator's overall
+        content, not fixate only on the context note. If context is empty, build entirely
+        from the screenshots/bio.
+
+        QUESTION STYLE (the most important rule):
+        NEVER use an interview structure like "I noticed you do X, so I'm wondering Y" or
+        "I've been watching your content and it made me think about Z." This sounds cold
+        and like an interview.
+
+        Instead: you may casually mention ONE specific thing you liked or noticed, woven
+        naturally into a sentence, not as a setup for the question. Then ask a question
+        about their ACCOUNT or JOURNEY as a whole, not a single isolated fact. Good
+        questions ask about evolution, decisions, or the bigger picture, e.g. "was this
+        always your approach or did it develop over time", not "why did you decide to do
+        X in that one video."
+
+        BAD EXAMPLE: "I've been seeing your videos for a while now and noticed you show
+        your full process. Was it hard for you in the beginning to make that decision?"
+        GOOD EXAMPLE: "What made you decide to show the full process instead of skipping
+        straight to the result?" — but even better when it asks about the account's
+        evolution: "Were you always this detailed about showing your process or did that
+        develop as your account grew?"
+
+        Aim for the second style: genuinely curious about their journey or account as a
+        whole, phrased like a real question a person would naturally ask, not like a
+        scripted interview opener.
+
+        QUALITY BAR:
+        All 5 versions must be strong enough that choosing between them is genuinely
+        difficult. Do not make some versions deliberately weaker placeholders — every
+        version should follow the improved question style above and be ready to send.
     """.trimIndent()
+
+    // Erkennt den Bild-Typ anhand der Magic Bytes im Base64-String,
+    // damit Anthropic den Base64-Block korrekt dekodieren kann
+    // (Handy-Screenshots sind meistens PNG, nicht JPEG).
+    private fun detectMediaType(base64: String): Base64ImageSource.MediaType = when {
+        base64.startsWith("iVBORw0KGgo") -> Base64ImageSource.MediaType.IMAGE_PNG
+        base64.startsWith("/9j/") -> Base64ImageSource.MediaType.IMAGE_JPEG
+        base64.startsWith("R0lGOD") -> Base64ImageSource.MediaType.IMAGE_GIF
+        base64.startsWith("UklGR") -> Base64ImageSource.MediaType.IMAGE_WEBP
+        else -> Base64ImageSource.MediaType.IMAGE_JPEG
+    }
 
     fun generate(request: DmRequest): DmResponse {
         // Zaehle gesendete ERST-DMs (nur dmSentAt gesetzt)
@@ -95,11 +148,29 @@ class DmGeneratorService(
             append("\nWrite the DMs now.")
         }
 
+        val contentBlocks = buildList {
+            request.screenshots.forEach { base64 ->
+                add(
+                    ContentBlockParam.ofImage(
+                        ImageBlockParam.builder()
+                            .source(
+                                Base64ImageSource.builder()
+                                    .data(base64)
+                                    .mediaType(detectMediaType(base64))
+                                    .build()
+                            )
+                            .build()
+                    )
+                )
+            }
+            add(ContentBlockParam.ofText(TextBlockParam.builder().text(userText).build()))
+        }
+
         val params = MessageCreateParams.builder()
             .model("claude-opus-4-8")
             .maxTokens(2500)
             .system(system)
-            .addUserMessage(userText)
+            .addUserMessageOfBlockParams(contentBlocks)
             .build()
 
         val message = anthropicClient.messages().create(params)
