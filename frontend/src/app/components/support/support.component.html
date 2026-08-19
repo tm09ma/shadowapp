@@ -8,10 +8,10 @@
          class="bubble"
          [class.user]="m.role==='user'"
          [class.assistant]="m.role==='assistant'">
-      {{ m.text }}
-    </div>
-    <div class="typing" *ngIf="loading">
-      <span></span><span></span><span></span>
+      <span *ngIf="m.streaming && !m.text" class="typing-inline">
+        <span></span><span></span><span></span>
+      </span>
+      <span *ngIf="m.text">{{ m.text }}</span>
     </div>
     <div #bottom></div>
   </div>

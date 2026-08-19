@@ -4,13 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { environment } from '../../../environments/environment';
 
+interface ChatMsg {
+  role: string;
+  text: string;
+  streaming?: boolean;
+}
+
 @Component({
   selector: 'app-support', standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './support.component.html', styleUrl: './support.component.css'
 })
 export class SupportComponent implements OnInit {
-  messages: { role: string; text: string }[] = [];
+  messages: ChatMsg[] = [];
   input = ''; loading = false;
 
   @ViewChild('bottom') bottomEl!: ElementRef;
@@ -48,9 +54,11 @@ export class SupportComponent implements OnInit {
     this.input = ''; this.loading = true;
     this.scrollToBottom();
 
-    // Leere Antwort-Bubble vorbereiten, waechst mit jedem Chunk
-    const assistantMsg = { role: 'assistant', text: '' };
+    // Eine Bubble fuer die Antwort: zeigt Punkte solange text leer ist,
+    // dann waechst der Text darin - nie ein zweites Element daneben.
+    const assistantMsg: ChatMsg = { role: 'assistant', text: '', streaming: true };
     this.messages.push(assistantMsg);
+    this.scrollToBottom();
 
     // Native EventSource kann keine Header setzen - Token daher als Query-Param
     // (AuthFilter im Backend akzeptiert ihn dort als Fallback zum X-Auth-Token Header).
@@ -62,10 +70,16 @@ export class SupportComponent implements OnInit {
       this.scrollToBottom();
     };
     es.onerror = () => {
-      es.close();
+      assistantMsg.streaming = false;
       this.loading = false;
+      es.close();
       this.scrollToBottom();
     };
+    es.addEventListener('done', () => {
+      assistantMsg.streaming = false;
+      this.loading = false;
+      es.close();
+    });
   }
 
   scrollToBottom(): void {
