@@ -89,10 +89,20 @@ export class SettingsComponent implements OnInit {
     this.api.createBatch(valid).subscribe(() => { this.vaultRows = [{ handle: '' }]; this.loadVault(); });
   }
   deleteVaultCreator(c: Creator): void { if (c.id) this.api.deleteCreator(c.id).subscribe(() => this.loadVault()); }
+  // Zeile "handle,niche,followers" - niche/followers optional, nur Handle noetig
+  parseBulkLine(line: string): CreatorDto {
+    const parts = line.split(',').map(p => p.trim());
+    const dto: CreatorDto = { handle: parts[0] };
+    if (parts[1]) dto.niche = parts[1];
+    if (parts[2] && !isNaN(Number(parts[2]))) {
+      dto.followers = Number(parts[2]);
+    }
+    return dto;
+  }
   addBulkToVault(): void {
-    const handles = this.bulkHandles.split('\n').map(h => h.trim()).filter(h => h);
-    if (handles.length === 0) return;
-    const dtos: CreatorDto[] = handles.map(handle => ({ handle }));
+    const lines = this.bulkHandles.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) return;
+    const dtos: CreatorDto[] = lines.map(l => this.parseBulkLine(l));
     this.api.createBatch(dtos).subscribe(() => { this.bulkHandles = ''; this.loadVault(); });
   }
   get filteredVault(): Creator[] {

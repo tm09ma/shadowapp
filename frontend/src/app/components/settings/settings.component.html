@@ -14,8 +14,9 @@
     <button class="secondary" (click)="addVaultRow()" style="margin-top:8px;">+ Row</button>
     <button class="success" (click)="saveVault()" style="margin-top:8px;">Save to vault</button>
 
-    <div class="muted" style="margin:14px 0 8px;">Or add many handles at once (one per line, no niche/followers):</div>
-    <textarea [(ngModel)]="bulkHandles" rows="5" placeholder="@handle1&#10;@handle2&#10;@handle3"></textarea>
+    <div class="muted" style="margin:14px 0 8px;">Or add many at once (one per line, niche/followers optional):</div>
+    <textarea [(ngModel)]="bulkHandles" rows="6"
+      placeholder="One per line: handle,niche,followers&#10;Example:&#10;@cookwithlexa,Food,44800&#10;@shunkiwii"></textarea>
     <button class="secondary" (click)="addBulkToVault()" style="margin-top:8px;">Add bulk to vault</button>
 
     <input [(ngModel)]="vaultSearch" placeholder="Search vault (handle, niche, followers)" style="margin-top:12px;" />
