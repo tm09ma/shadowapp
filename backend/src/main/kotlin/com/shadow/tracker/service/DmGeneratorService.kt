@@ -15,6 +15,9 @@ import com.shadow.tracker.repository.CreatorRepository
 import com.shadow.tracker.repository.JournalRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
+import org.springframework.http.HttpStatus
+import java.util.Base64
 
 // ============================================================
 // DmGeneratorService
@@ -90,12 +93,16 @@ class DmGeneratorService(
     // Erkennt den Bild-Typ anhand der Magic Bytes im Base64-String,
     // damit Anthropic den Base64-Block korrekt dekodieren kann
     // (Handy-Screenshots sind meistens PNG, nicht JPEG).
-    private fun detectMediaType(base64: String): Base64ImageSource.MediaType = when {
+    // Gibt null zurueck bei unbekanntem Format, statt faelschlich JPEG zu
+    // behaupten — ein falsch deklarierter Media-Type fuehrt bei Anthropic
+    // zu einem 400 (Bytes passen nicht zum behaupteten Typ), der ungefangen
+    // als 500 beim Client landet.
+    private fun detectMediaType(base64: String): Base64ImageSource.MediaType? = when {
         base64.startsWith("iVBORw0KGgo") -> Base64ImageSource.MediaType.IMAGE_PNG
         base64.startsWith("/9j/") -> Base64ImageSource.MediaType.IMAGE_JPEG
         base64.startsWith("R0lGOD") -> Base64ImageSource.MediaType.IMAGE_GIF
         base64.startsWith("UklGR") -> Base64ImageSource.MediaType.IMAGE_WEBP
-        else -> Base64ImageSource.MediaType.IMAGE_JPEG
+        else -> null
     }
 
     fun generate(request: DmRequest): DmResponse {
@@ -151,19 +158,32 @@ class DmGeneratorService(
         }
 
         val contentBlocks = buildList {
-            request.screenshots.forEach { base64 ->
-                add(
-                    ContentBlockParam.ofImage(
-                        ImageBlockParam.builder()
-                            .source(
-                                Base64ImageSource.builder()
-                                    .data(base64)
-                                    .mediaType(detectMediaType(base64))
-                                    .build()
-                            )
-                            .build()
+            request.screenshots.forEachIndexed { index, base64 ->
+                try {
+                    val mediaType = detectMediaType(base64)
+                        ?: throw IllegalArgumentException("unbekanntes Bildformat (Magic Bytes nicht erkannt)")
+                    Base64.getDecoder().decode(base64)
+
+                    add(
+                        ContentBlockParam.ofImage(
+                            ImageBlockParam.builder()
+                                .source(
+                                    Base64ImageSource.builder()
+                                        .data(base64)
+                                        .mediaType(mediaType)
+                                        .build()
+                                )
+                                .build()
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    // Kaputtes/nicht unterstuetztes Bild ueberspringen statt die
+                    // ganze Anfrage mit 500 abstuerzen zu lassen.
+                    log.warn(
+                        "Screenshot {} fuer {} konnte nicht verarbeitet werden, wird uebersprungen: {}",
+                        index, request.handle, e.message
+                    )
+                }
             }
             add(ContentBlockParam.ofText(TextBlockParam.builder().text(userText).build()))
         }
@@ -180,12 +200,23 @@ class DmGeneratorService(
             .addUserMessageOfBlockParams(contentBlocks)
             .build()
 
-        val message = anthropicClient.messages().create(params)
+        val message = try {
+            anthropicClient.messages().create(params)
+        } catch (e: Exception) {
+            log.error("Anthropic-Request fuer {} fehlgeschlagen ({} Bild(er) angehaengt)", request.handle, contentBlocks.count { it.isImage() }, e)
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "DM-Generierung fehlgeschlagen: ${e.message}")
+        }
+
         val raw = message.content()
             .mapNotNull { it.text().orElse(null)?.text() }
             .joinToString("")
             .replace("```json", "").replace("```", "").trim()
 
-        return mapper.readValue(raw, DmResponse::class.java)
+        return try {
+            mapper.readValue(raw, DmResponse::class.java)
+        } catch (e: Exception) {
+            log.error("Antwort von Claude fuer {} war kein valides JSON: {}", request.handle, raw, e)
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "DM-Generierung lieferte unerwartetes Format")
+        }
     }
 }
